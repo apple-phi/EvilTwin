@@ -2,10 +2,9 @@ import numpy as np
 from tilemap import Tile
 
 class Player:
-    def __init__(self, map, coords, is_enemy = False):
+    def __init__(self, map, coords):
         self.map = map
         self.xy = coords
-        self.is_enemy = is_enemy
         self.dest = self.src
 
         self.is_moving = False
@@ -16,18 +15,13 @@ class Player:
         Chooses the player's destination in the x and/or y direction based on a vector
         ranging from [-1,-1] to [1,1]
         """
-        if self.is_enemy:
-            xy = (-xy[0], -xy[1])
-
         mov = self.xy
 
         # While the current tile dest is blank, move along by 1
         # This is a while True which gets broken as soon as a wall is met. 
-        while True:
-            if self.map[mov[1] + xy[1], mov[0] + xy[0]] == Tile.WALL:
-                mov = (mov[0] + xy[0], mov[1] + xy[1])
-            else:
-                break
+        while self.map[mov[1] + xy[1], mov[0] + xy[0]] != Tile.WALL:
+            mov = (mov[0] + xy[0], mov[1] + xy[1])
+
         
         self.dest = mov
 
@@ -61,3 +55,7 @@ class Player:
 
     def __repr__(self):
         return f"Player - Current: {self.xy}, Dest: {self.dest}, Dir: {self.dir}, moving: {self.is_moving}"
+
+class Enemy(Player):
+    def path(self,xy):
+        return super().path(-xy[0],-xy[1])
