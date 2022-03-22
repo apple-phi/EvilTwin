@@ -22,7 +22,6 @@ def parse_into_arr(path):
         )
 
 
-# TileSet Test
 class TileSet:
     ...
 
