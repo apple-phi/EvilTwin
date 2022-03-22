@@ -22,6 +22,7 @@ def parse_into_arr(path):
         )
 
 
+# TileSet Test
 class TileSet:
     ...
 
@@ -30,8 +31,14 @@ class TileMap:
     def __init__(self, path: str, tileset: TileSet, rect=None):
         self.array = parse_into_arr(path)
         self.dimensions = self.array.shape[::-1]
-        self.image = pygame.Surface(self.dimensions)
+        
         self.tileset = tileset
+
+        self.image = pygame.Surface((
+            self.dimensions[0] * self.tileset.size, 
+            self.dimensions[1] * self.tileset.size
+            ))
+
         self.rect = pygame.Rect(rect) if rect is not None else self.image.get_rect()
 
     def __getitem__(self, coords):
@@ -39,9 +46,9 @@ class TileMap:
         return self.map[y, x]
 
     def render(self):
-        for (i, j), value in np.ndenumerate(self.array):
+        for (y, x), value in np.ndenumerate(self.array):
             self.image.blit(
-                self.tileset[value], (i * self.tileset.size, j * self.tileset.size)
+                self.tileset[value], (x * self.tileset.size, y * self.tileset.size)
             )
 
     def __repr__(self):
