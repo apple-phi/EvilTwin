@@ -15,9 +15,6 @@ class Player:
         Chooses the player's destination in the x and/or y direction based on a vector
         ranging from [-1,-1] to [1,1]
         """
-        # if self.is_enemy:
-        #     xy = (-xy[0], -xy[1])
-
         mov = self.xy
 
         # While the current tile dest is blank, move along by 1
@@ -61,4 +58,4 @@ class Player:
 
 class Enemy(Player):
     def path(self,xy):
-        return super().path(xy)
+        return super().path(-xy[0],-xy[1])
