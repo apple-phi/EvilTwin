@@ -68,7 +68,7 @@ class TileMap:
             [
                 (Tile(value).image, (x * Tile.width, y * Tile.height))
                 for (y, x), value in np.ndenumerate(self.array)
-                if if Tile(value).image is not None
+                if Tile(value).image is not None
             ]
         )
         return self
