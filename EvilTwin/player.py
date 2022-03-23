@@ -1,10 +1,10 @@
 import numpy as np
-from .tilemap import Tile
+from .tilemap import *
 import pygame
 
 class Player:
     def __init__(self, map, coords, is_enemy = False):
-        self.map = map
+        self.map: Level = map
         self.xy = coords
         self.is_enemy = is_enemy
         self.dest = self.xy
@@ -25,7 +25,11 @@ class Player:
 
         # While the current tile dest is blank, move along by 1
         # This is a while True which gets broken as soon as a wall is met. 
-        while self.map[mov[1] + xy[1], mov[0] + xy[0]] != Tile.WALL:
+        while (
+            mov[0] + xy[0] < self.map.map.dimensions[0] and 
+            mov[1] + xy[1] < self.map.map.dimensions[1] and
+            self.map[mov[0] + xy[0], mov[1] + xy[1]] == 0
+        ):
                 mov = (mov[0] + xy[0], mov[1] + xy[1])
         
         self.dest = mov
