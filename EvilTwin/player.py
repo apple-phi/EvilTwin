@@ -1,7 +1,7 @@
 import numpy as np
 from .tilemap import Tile
 import pygame
-
+# Hi
 class Player:
     def __init__(self, map, coords, is_enemy = False):
         self.map = map
