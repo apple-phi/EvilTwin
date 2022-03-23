@@ -26,7 +26,7 @@ class Player:
         # While the current tile dest is blank, move along by 1
         # This is a while True which gets broken as soon as a wall is met. 
         while self.map[mov[1] + xy[1], mov[0] + xy[0]] != Tile.WALL:
-                mov = (mov[0] + xy[0], mov[1] + xy[1])
+            mov = (mov[0] + xy[0], mov[1] + xy[1])
         
         self.dest = mov
 
