@@ -3,7 +3,7 @@ from .tilemap import Tile
 import pygame
 
 class Player:
-    def __init__(self, map, coords):
+    def __init__(self, map, coords, is_enemy = False):
         self.map = map
         self.xy = coords
         self.is_enemy = is_enemy
