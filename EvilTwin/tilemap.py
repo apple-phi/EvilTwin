@@ -55,6 +55,7 @@ class TileMap:
                 for (y, x), value in np.ndenumerate(self.array)
             ]
         )
+        return self
 
     def __repr__(self):
         return repr(self.array)
