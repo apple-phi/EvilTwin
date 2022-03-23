@@ -1,15 +1,19 @@
 import numpy as np
-from tilemap import Tile
+from .tilemap import Tile
+import pygame
 
 class Player:
     def __init__(self, map, coords, is_enemy = False):
         self.map = map
         self.xy = coords
         self.is_enemy = is_enemy
-        self.dest = self.src
+        self.dest = self.xy
 
         self.is_moving = False
         self.dir = (0, 0)
+
+        self.image = pygame.Surface((Tile.width, Tile.height))
+        self.image.fill((255, 0, 0))
     
     def path(self, xy):
         """
@@ -23,11 +27,8 @@ class Player:
 
         # While the current tile dest is blank, move along by 1
         # This is a while True which gets broken as soon as a wall is met. 
-        while True:
-            if self.map[mov[1] + xy[1], mov[0] + xy[0]] == Tile.WALL:
+        while self.map[mov[1] + xy[1], mov[0] + xy[0]] != Tile.WALL:
                 mov = (mov[0] + xy[0], mov[1] + xy[1])
-            else:
-                break
         
         self.dest = mov
 
@@ -39,6 +40,8 @@ class Player:
         # Otherwise, set direction to null. 
         else:
             self.dir = (0, 0)
+        
+        print(self.dest)
     
 
     def move(self):

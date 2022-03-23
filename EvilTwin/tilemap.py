@@ -61,7 +61,7 @@ class TileMap:
 
     def __getitem__(self, coords):
         x, y = coords
-        return self.map[y, x]
+        return self.array[y, x]
 
     def render(self):
         self.image.blits(
