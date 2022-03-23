@@ -8,11 +8,11 @@ ASSETS = pathlib.Path(__file__).parent / "assets"
 class Level:
     def __init__(self, screen: pygame.Surface, path: str):
         self.screen = screen
-        self.map = TileMap(path).render()
+        self.map: TileMap = TileMap(path).render()
 
     def show(self):
-        self.screen.blit(self.map.image, (0, 0))
-        pygame.display.flip()
+        """Render level tilemap, scaled to the screen size."""
+        pygame.transform.scale(self.map.image, self.screen.get_size(), self.screen)
         return self
 
 
@@ -23,3 +23,4 @@ class Game:
         clock = pygame.time.Clock()
         while True:
             clock.tick(30)
+            pygame.display.flip()
