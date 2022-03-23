@@ -3,7 +3,7 @@ from .tilemap import Tile
 import pygame
 
 class Player:
-    def __init__(self, map, coords, is_enemy = False):
+    def __init__(self, map, coords):
         self.map = map
         self.xy = coords
         self.is_enemy = is_enemy
@@ -20,8 +20,6 @@ class Player:
         Chooses the player's destination in the x and/or y direction based on a vector
         ranging from [-1,-1] to [1,1]
         """
-        if self.is_enemy:
-            xy = (-xy[0], -xy[1])
 
         mov = self.xy
 
@@ -64,3 +62,7 @@ class Player:
 
     def __repr__(self):
         return f"Player - Current: {self.xy}, Dest: {self.dest}, Dir: {self.dir}, moving: {self.is_moving}"
+
+class Enemy(Player):
+    def move(self,xy):
+        return super().move(-xy[0],-xy[1])
