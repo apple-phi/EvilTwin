@@ -1,3 +1,14 @@
+
+
+
+
+
+"""DON"T USE. This is legacy code. Please use `levels.py` instead."""
+
+
+
+
+
 from enum import IntEnum
 import io
 import pathlib
@@ -75,3 +86,16 @@ class TileMap:
 
     def __repr__(self):
         return repr(self.array)
+
+class Level:
+    def __init__(self, screen: pygame.Surface, path: str):
+        self.screen = screen
+        self.map: TileMap = TileMap(path).render()
+
+    def show(self):
+        """Render level tilemap, scaled to the screen size."""
+        pygame.transform.scale(self.map.image, self.screen.get_size(), self.screen)
+        return self
+    
+    def __getitem__(self, key):
+        return self.map[key]

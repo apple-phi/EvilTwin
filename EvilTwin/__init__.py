@@ -1,35 +1,21 @@
 import pathlib
 import sys
 import pygame
-from .tilemap import TileMap, Tile
+
+from .levels import Level
+from .constants import TILE_SIZE, LEVELS
 from .player import Player
-
-ASSETS = pathlib.Path(__file__).parent / "assets"
-
-
-class Level:
-    def __init__(self, screen: pygame.Surface, path: str):
-        self.screen = screen
-        self.map: TileMap = TileMap(path).render()
-
-    def show(self):
-        """Render level tilemap, scaled to the screen size."""
-        pygame.transform.scale(self.map.image, self.screen.get_size(), self.screen)
-        return self
-    
-    def __getitem__(self, key):
-        return self.map[key]
 
 
 class Game:
     def __init__(self):
         screen = pygame.display.set_mode((640, 480), pygame.SCALED)
-        lvl = Level(screen, ASSETS / "level.txt")
+        level = Level(LEVELS / "test.toml")
 
-        lvl.show()
+        level.show_on(screen)
         clock = pygame.time.Clock()
 
-        self.pl = Player(lvl, (0, 0))
+        self.pl = Player(level, (0, 0))
         while True:
             for event in pygame.event.get():
                 match event.type:
@@ -41,9 +27,9 @@ class Game:
 
 
             screen.fill((0, 0, 0))
-            lvl.show()
+            level.show_on(screen)
             self.pl.move()
-            screen.blit(self.pl.image, (self.pl.xy[0] * Tile.width, self.pl.xy[1] * Tile.height))
+            self.pl.show_on(screen)
 
             pygame.display.flip()
             clock.tick(30)
