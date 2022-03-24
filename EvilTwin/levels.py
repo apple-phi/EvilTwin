@@ -99,8 +99,8 @@ class Level:
 
     def wall_at(self, x, y):
         return (
-            x not in range(self.dimensions[1])
-            or y not in range(self.dimensions[1])
+            not 0 <= x < self.dimensions[1]
+            or not 0 <= y < self.dimensions[1]
             or self.array[x, y] in WALLS
             or [y, x] in self.items.values()
         )
