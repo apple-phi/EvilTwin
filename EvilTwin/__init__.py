@@ -10,11 +10,11 @@ from .levels import Level
 from .player import Player
 
 LOADING, IN_MENU, IN_LEVEL = 0, 1, 2
-MOVES ={
-    pygame.K_w: (0, -1),
-    pygame.K_a: (-1, 0),
-    pygame.K_s: (0, 1),
-    pygame.K_d: (1, 0),
+MOVES = {
+    pygame.K_w: "up",
+    pygame.K_a: "left",
+    pygame.K_s: "down",
+    pygame.K_d: "right",
 }
 
 class Button:
@@ -42,7 +42,7 @@ class Button:
 class Game:
     def __init__(self):
         screen = pygame.display.set_mode((640, 480), pygame.SCALED)
-        self.level = Level(LEVELS / "test.toml")
+        self.level = Level(LEVELS / "1.toml")
         self.state = IN_MENU
         self.level.show_on(screen)
         clock = pygame.time.Clock()
@@ -69,17 +69,17 @@ class Game:
                 screen.fill((0, 0, 0))
                 self.level.show_on(screen)
                 self.player.move()
-                self.player.show_on(screen)
+                self.player.animate_on(screen, idle_every=5)
 
             pygame.display.flip()
             clock.tick(30)
 
-    def parse_event(self, key: pygame.event._EventTypes):
+    def parse_event(self, key):
         if self.state == IN_LEVEL:
             if key == pygame.K_ESCAPE:
                 self.state = IN_MENU
-            elif key in MOVES and not self.player.is_moving:
-                self.player.path(MOVES[key])
+            elif key in MOVES:
+                self.player.state = MOVES[key]
 
     def check_events(self):
         for event in pygame.event.get():

@@ -1,21 +1,47 @@
+from enum import Enum
+
 import numpy as np
 import pygame
 
-from .levels import TILE_SIZE, Level
+from .levels import Level
+from .constants import SPRITES
+from .animation import SpriteAnimation
+
+VECTORS = {
+    "idle": (0, 0),
+    "left": (-1, 0),
+    "right": (1, 0),
+    "up": (0, -1),
+    "down": (0, 1),
+}
 
 
 class Player:
-    def __init__(self, level: Level, is_enemy=False):
+    def __init__(self, level: Level):
         self.level = level
         self.xy = level.start
-        self.is_enemy = is_enemy
         self.dest = self.xy
-
         self.is_moving = False
         self.dir = (0, 0)
 
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((255, 0, 0))
+        self._state = "idle"  # idle | left | right | up | down | rotate
+        self.animation = SpriteAnimation(SPRITES / "player")
+        self.tick = 0
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
+        self.dir = VECTORS[value]
+        self.is_moving = value != "idle"
+
+    def animate(self, idle_every=1):
+        if self.tick == 0 or self.state != "idle":
+            self.image = next(self.animation[self.state])
+        self.tick = (self.tick + 1) % idle_every
 
     def show_on(self, screen: pygame.Surface):
         screen_width, screen_height = screen.get_size()
@@ -26,35 +52,9 @@ class Player:
             (self.xy[0] * width, self.xy[1] * height),
         )
 
-    def path(self, xy):
-        """
-        Chooses the player's destination in the x and/or y direction based on a vector
-        ranging from [-1,-1] to [1,1]
-        """
-
-        mov = self.xy
-
-        # While the current tile dest is blank, move along by 1
-        # This is a while True which gets broken as soon as a wall is met.
-        while (
-            mov[0] + xy[0] < self.level.dimensions[0]
-            and mov[1] + xy[1] < self.level.dimensions[1]
-            and not self.level.wall_at(mov[0] + xy[0], mov[1] + xy[1])
-        ):
-            mov = (mov[0] + xy[0], mov[1] + xy[1])
-
-        self.dest = mov
-
-        # If the end result causes movement, set movement flag to true, set direction.
-        if self.dest != self.xy:
-            self.is_moving = True
-            self.dir = xy
-
-        # Otherwise, set direction to null.
-        else:
-            self.dir = (0, 0)
-
-        print(self.dest)
+    def animate_on(self, screen: pygame.Surface, idle_every=1):
+        self.animate(idle_every)
+        self.show_on(screen)
 
     def move(self):
         """
@@ -67,15 +67,14 @@ class Player:
 
             # If have reached a wall, stop moving
             if self.level.wall_at(trial_dest[1], trial_dest[0]):
-                self.dir = (0, 0)
-                self.is_moving = False
+                self.state = "idle"
 
             # Else, move
             else:
                 self.xy = trial_dest
 
     def __repr__(self):
-        return f"Player - Current: {self.xy}, Dest: {self.dest}, Dir: {self.dir}, moving: {self.is_moving}"
+        return f"Player - Current: {self.xy}, Dir: {self.dir}, moving: {self.is_moving}"
 
 
 class Enemy(Player):
