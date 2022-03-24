@@ -79,7 +79,8 @@ class Game:
             if key == pygame.K_ESCAPE:
                 self.state = IN_MENU
             elif key in MOVES:
-                self.player.state = MOVES[key]
+                if not self.player.is_moving: 
+                    self.player.state = MOVES[key]
 
     def check_events(self):
         for event in pygame.event.get():
@@ -96,3 +97,4 @@ class Game:
     def enter_level(self,level):
         self.state = IN_LEVEL
         self.level = Level(LEVELS / level)
+        self.player = Player(self.level)

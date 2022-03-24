@@ -68,10 +68,14 @@ class Player:
             # If have reached a wall, stop moving
             if self.level.wall_at(trial_dest[1], trial_dest[0]):
                 self.state = "idle"
+                self.is_moving = False
 
             # Else, move
             else:
                 self.xy = trial_dest
+            
+        self.level.collect_star(self.xy[0], self.xy[1])
+
 
     def __repr__(self):
         return f"Player - Current: {self.xy}, Dir: {self.dir}, moving: {self.is_moving}"

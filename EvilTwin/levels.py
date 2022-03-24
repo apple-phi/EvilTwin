@@ -32,6 +32,7 @@ class Level:
         return self
 
     def _render_tiles(self) -> "Level":
+        self.image.fill((0, 0, 0))
         self.image.blits(
             [
                 (self.tileset[tile], (x * TILE_SIZE, y * TILE_SIZE))
@@ -41,11 +42,12 @@ class Level:
         return self
 
     def _render_stars(self) -> "Level":
+        self._render_tiles()
         self.image.blits(
             [
                 (
                     STAR_SPRITE,
-                    (y * TILE_SIZE + STAR_OFFSET, x * TILE_SIZE + STAR_OFFSET),
+                    (x * TILE_SIZE + STAR_OFFSET, y * TILE_SIZE + STAR_OFFSET),
                 )
                 for x, y in self.stars
             ]
