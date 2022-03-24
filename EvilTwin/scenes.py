@@ -43,6 +43,42 @@ class Scene(abc.ABC):
         ...
 
 
+class TransitionBetween(Scene):
+    def __init__(self, old: Scene, new: Scene, duration=50):
+        super().__init__()
+        self.old = old
+        self.new = new
+        self.scenes = old, new
+        self.duration = duration
+        self.elapsed = 0
+        self.veil = pygame.display.get_surface().copy()
+        self.veil.fill((0, 0, 0))
+
+    def update_alpha(self) -> float:
+        """Make quadratic through (0, 0) -> (d/2, 1) -> (d, 0)
+
+        y=255\left(1-\ 4\left(\frac{x}{d}-\frac{1}{2}\right)^{2}\right)
+        """
+        return self.veil.set_alpha(
+            255 * (1 - 4 * (self.elapsed / self.duration - 0.5) ** 2)
+        )
+
+    @property
+    def current_scene(self) -> Scene:
+        return self.scenes[self.elapsed > self.duration / 2]
+
+    def show_on(self, screen: pygame.Surface):
+        self.current_scene.show_on(screen)
+        self.update_alpha()
+        screen.blit(self.veil, (0, 0))
+        self.elapsed += 1
+        if self.elapsed >= self.duration:
+            self.next_scene = self.new
+
+    def handle_event(self, event):
+        self.current_scene.handle_event(event)
+
+
 class MenuScreen(Scene):
     def __init__(self):
         super().__init__()
@@ -60,7 +96,9 @@ class MenuScreen(Scene):
             Button.run(self.menu, *pygame.mouse.get_pos())
 
     def enter_level(self, number: str):
-        self.next_scene = LevelScreen(LEVELS / (f"{number}.toml"))
+        self.next_scene = TransitionBetween(
+            self, LevelScreen(LEVELS / (f"{number}.toml"))
+        )
 
 
 class LevelScreen(Scene):
@@ -82,7 +120,7 @@ class LevelScreen(Scene):
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.next_scene = MenuScreen()
+                self.next_scene = TransitionBetween(self, MenuScreen())
             elif (
                 event.key in MOVES
                 and not self.player.is_moving
