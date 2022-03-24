@@ -66,7 +66,6 @@ class Game:
                 for b in self.menu:
                     b.display(screen)
             elif self.state == IN_LEVEL:
-                screen.fill((0, 0, 0))
                 self.level.show_on(screen)
                 self.player.move()
                 self.player.animate_on(screen, idle_every=5)
@@ -78,8 +77,7 @@ class Game:
         if self.state == IN_LEVEL:
             if key == pygame.K_ESCAPE:
                 self.state = IN_MENU
-            elif key in MOVES:
-                if not self.player.is_moving: 
+            elif key in MOVES and not self.player.is_moving:
                     self.player.state = MOVES[key]
 
     def check_events(self):

@@ -32,7 +32,6 @@ class Level:
         return self
 
     def _render_tiles(self) -> "Level":
-        self.image.fill((0, 0, 0))
         self.image.blits(
             [
                 (self.tileset[tile], (x * TILE_SIZE, y * TILE_SIZE))
@@ -42,7 +41,6 @@ class Level:
         return self
 
     def _render_stars(self) -> "Level":
-        self._render_tiles()
         self.image.blits(
             [
                 (
@@ -52,11 +50,12 @@ class Level:
                 for x, y in self.stars
             ]
         )
+        return self
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
             self.stars.remove([x, y])
-            self._render_stars()
+            self._render_tiles()._render_stars()
             return True
         return False
 
