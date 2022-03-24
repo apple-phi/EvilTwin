@@ -1,9 +1,11 @@
-import textwrap
+import textwrap, toml
 class Map:
-    def __init__(self,filepath,default='-'):
+    def __init__(self,filepath,ITEM_STR=(),default='-'):
         self.default = default
         self.filepath = filepath
-        self.array = self.load()
+        self.ITEM_STR = ITEM_STR
+        self.array, self.items = self.load()
+
     def save(self):
         with open(self.filepath,"w") as f:
             f.write(textwrap.dedent("""\
@@ -14,21 +16,29 @@ class Map:
             map = '''
             """))
             f.write("\n".join([",".join(self.array[i]) for i in range(len(self.array))]))
-            f.write("\n'''")
+            print(self.items)
+            f.write("\n'''\n[items]\n"+"\n".join(f"{k} = {v}" for k,v in self.items.items()))
     def load(self):
         try:
             with open(self.filepath,"r") as f:
-                return [j.strip().split(",") for j in f.readlines()[5:-1]]
+                data = toml.load(f)
+                return [j.strip().split(",") for j in data['map'].split()], data['items']
         except FileNotFoundError:
             print("generating new file")
-            return self.makeblank(50,10)
+            return self.makeblank(10,10), {}
     def __getitem__(self,xy):
         (x,y) = xy
         return self.array[y-1][x-1]
     
     def __setitem__(self,xy,val):
+        print(self.items,self.ITEM_STR,val)
         (x,y) = xy
-        self.array[y-1][x-1] = val
+        if val in self.ITEM_STR:
+            q = self.items.setdefault(val, [])
+            if [x,y] not in q:
+                q.append([x,y])
+        else:
+            self.array[y-1][x-1] = val
     
     def __delitem__(self,xy):
         (x,y) = xy
