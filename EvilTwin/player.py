@@ -23,19 +23,15 @@ MOVES = {
 }
 
 
-class Player:
+class BaseCharacter:
     def __init__(self, level: Level):
         self.level = level
-        self.xy = level.start
-        self.dest = self.xy
         self.is_moving = False
         self.dir = (0, 0)
+        self.stars = 0
 
         self._state = "idle"  # idle | left | right | up | down | rotate
-        self.animation = SpriteAnimation(SPRITES / "player")
         self.tick = 0
-
-        self.finished = False
 
     @property
     def state(self):
@@ -83,8 +79,18 @@ class Player:
             else:
                 self.xy = trial_dest
 
-        self.level.collect_star(self.xy[0], self.xy[1])
+        self.stars += self.level.collect_star(*self.xy)
 
+
+class Player(BaseCharacter):
+    def __init__(self, level: Level):
+        super().__init__(level)
+        self.xy = level.start
+        self.animation = SpriteAnimation(SPRITES / "player")
+        self.finished = False
+
+    def move(self):
+        super().move()
         if len(self.level.stars) == 0 and self.xy == self.level.end:
             self.finished = True
 
@@ -92,6 +98,21 @@ class Player:
         return f"Player - Current: {self.xy}, Dir: {self.dir}, moving: {self.is_moving}"
 
 
-class Enemy(Player):
-    def move(self, xy):
-        return super().move(-xy[0], -xy[1])
+class Enemy(BaseCharacter):
+    def __init__(self, level: Level):
+        super().__init__(level)
+        self.xy = level.end
+        self._dir = (0, 0)
+        self.animatation = SpriteAnimation(SPRITES / "enemy")
+
+    @property
+    def dir(self):
+        return self._dir
+
+    @dir.setter
+    def dir(self, value):
+        """Set the direction to be the opposite of the player"""
+        self._dir = (-value[0], -value[1])
+
+    def move(self):
+        super().move()
