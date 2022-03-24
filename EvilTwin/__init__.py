@@ -42,7 +42,7 @@ class Button:
 
 class Game:
     def __init__(self):
-        screen = pygame.display.set_mode((640, 480), pygame.SCALED)
+        screen = pygame.display.set_mode((700, 700), pygame.SCALED)
         pygame.display.set_caption("Game Name")
         pygame.display.set_icon(STAR_SPRITE)
         self.level = Level(LEVELS / "1.toml")
