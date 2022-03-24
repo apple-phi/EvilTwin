@@ -67,17 +67,17 @@ class BaseCharacter:
         """
 
         # If currently moving
-        if self.is_moving:
-            trial_dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
+        if all(i.is_integer() for i in self.xy):
+            self.dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
 
             # If have reached a wall, stop moving
-            if self.level.wall_at(trial_dest[1], trial_dest[0]):
+            if self.level.wall_at(int(self.dest[1]), int(self.dest[0])):
                 self.state = "idle"
                 self.is_moving = False
+                self.dir = [0, 0]
 
-            # Else, move
-            else:
-                self.xy = trial_dest
+        if self.is_moving:
+            self.xy = [self.xy[0] + 0.25 * self.dir[0], self.xy[1] + 0.25 * self.dir[1]]
 
         self.stars += self.level.collect_star(*self.xy)
 
@@ -85,7 +85,7 @@ class BaseCharacter:
 class Player(BaseCharacter):
     def __init__(self, level: Level):
         super().__init__(level)
-        self.xy = level.start
+        self.xy = tuple(map(float, level.start))
         self.animation = SpriteAnimation(SPRITES / "player")
         self.finished = False
 
@@ -101,7 +101,7 @@ class Player(BaseCharacter):
 class Enemy(BaseCharacter):
     def __init__(self, level: Level):
         super().__init__(level)
-        self.xy = level.end
+        self.xy = tuple(map(float, level.end))
         self._dir = (0, 0)
         self.animatation = SpriteAnimation(SPRITES / "enemy")
 
