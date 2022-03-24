@@ -8,20 +8,24 @@ class Map:
 
     def save(self):
         with open(self.filepath,"w") as f:
-            f.write(textwrap.dedent("""\
+            f.write(textwrap.dedent(f"""\
             name = "Level 1"
-            stars = [[2, 3], [2, 1], [3, 2]]
-            start = [1, 1]
-            end = [3, 3]
+            stars = {[[i-1,j-1] for i,j in self.stars]}
+            start = {[self.player[0]-1,self.player[1]-1]}
+            end = {[self.enemy[0]-1,self.enemy[1]-1]}
             map = '''
             """))
             f.write("\n".join([",".join(self.array[i]) for i in range(len(self.array))]))
-            print(self.items)
-            f.write("\n'''\n[items]\n"+"\n".join(f"{k} = {v}" for k,v in self.items.items()))
+            f.write("\n'''\n[items]\n"+"\n".join(f"{k} = {[[i-1,j-1] for i,j in v]}" for k,v in self.items.items()))
     def load(self):
         try:
             with open(self.filepath,"r") as f:
                 data = toml.load(f)
+                for k,v in data["items"].items():
+                    data["items"][k] = [[i+1,j+1] for i,j in v]
+                self.player = [data["start"][0]+1,data["start"][1]+1]
+                self.enemy = [data["end"][0]+1,data["end"][1]+1]
+                self.stars = [[i-1,j-1] for i,j in data["stars"]]
                 return [j.strip().split(",") for j in data['map'].split()], data['items']
         except FileNotFoundError:
             print("generating new file")
@@ -31,7 +35,6 @@ class Map:
         return self.array[y-1][x-1]
     
     def __setitem__(self,xy,val):
-        print(self.items,self.ITEM_STR,val)
         (x,y) = xy
         if val in self.ITEM_STR:
             q = self.items.setdefault(val, [])

@@ -16,7 +16,8 @@ class Game():
         self.path = pathlib.Path(__file__).parent.absolute()
 
         #filepath = self.path + "/GameStuff/ARRAY.txt"
-        filepath = self.path/"maze2.toml"
+        #filepath = self.path.parent/"EvilTwin/assets/levels/1.toml"
+        filepath = self.path / "maze2.toml"
 
         self.GS = Stats()
         self.Map = Map(filepath,ITEMS,WALLS[0])
@@ -35,7 +36,7 @@ class Game():
         self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
 
         self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(104)}
-        tools = {1:"Brush",2:"R_Sel",3:"Remove Items",self.actual_width:"Save"}
+        tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",self.actual_width:"Save"}
         self.cols = {(n%13+1,n//13+1):f'{n:03d}' for n in range(104)}
         pygame.init()
 
@@ -71,7 +72,28 @@ class Game():
         for x,y in self.to_change:
             self.blit_tile(x,y)
         self.to_change = []
-        
+        image = pygame.Surface((10,10))
+        image.fill([255,255,0])
+        for x,y in self.Map.stars:
+            self.screen.blit(
+                image,
+                (self.GS.cellsize*(x-1),self.GS.cellsize*(y-1)),
+            )
+        image = pygame.Surface((10,10))
+        image.fill([255,0,0])
+        if self.Map.enemy:
+            self.screen.blit(
+                image,
+                (self.GS.cellsize*(self.Map.enemy[0]-1),self.GS.cellsize*(self.Map.enemy[1]-1)),
+            )
+        image = pygame.Surface((10,10))
+        image.fill([0,255,0])
+        if self.Map.player:
+            self.screen.blit(
+                image,
+                (self.GS.cellsize*(self.Map.player[0]-1),self.GS.cellsize*(self.Map.player[1]-1)),
+            )
+            
         pygame.display.flip()
 
     def CheckEvents(self):
@@ -91,6 +113,12 @@ class Game():
                     self.mode = "Rect_select"
                 elif coord[0]==3:
                     self.mode = "Items"
+                elif coord[0]==4:
+                    self.mode = "Player"
+                elif coord[0]==5:
+                    self.mode = "Enemy"
+                elif coord[0]==6:
+                    self.mode = "Star"
                 else:
                     self.rect_selection = []
                     if coord[0]==1:
@@ -114,7 +142,20 @@ class Game():
                     for v in self.Map.items.values():
                         if coord in v:
                             v.remove(coord)
+                    if coord in self.Map.stars:
+                        self.Map.stars.remove(coord)
+                    if coord == self.Map.player:
+                        self.Map.player = None
+                    if coord == self.Map.enemy:
+                        self.Map.enemy = None
                     self.to_change.append(coord)
+                elif self.mode == "Player":
+                    self.Map.player = list(coord)
+                elif self.mode == "Enemy":
+                    self.Map.enemy = list(coord)
+                elif self.mode == "Star":
+                    if not list(coord) in self.Map.stars:
+                        self.Map.stars.append(list(coord))
                 elif self.mode == "Rect_select":
                     if len(self.rect_selection) == 0 and not self.prevpressed:
                         self.rect_selection = coord
