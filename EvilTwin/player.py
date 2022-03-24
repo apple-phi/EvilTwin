@@ -15,6 +15,13 @@ VECTORS = {
     "down": (0, 1),
 }
 
+MOVES = {
+    pygame.K_w: "up",
+    pygame.K_a: "left",
+    pygame.K_s: "down",
+    pygame.K_d: "right",
+}
+
 
 class Player:
     def __init__(self, level: Level):
@@ -75,12 +82,11 @@ class Player:
             # Else, move
             else:
                 self.xy = trial_dest
-            
+
         self.level.collect_star(self.xy[0], self.xy[1])
 
         if len(self.level.stars) == 0 and self.xy == self.level.end:
             self.finished = True
-
 
     def __repr__(self):
         return f"Player - Current: {self.xy}, Dir: {self.dir}, moving: {self.is_moving}"
