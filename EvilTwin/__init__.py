@@ -47,7 +47,7 @@ class Game:
         self.level.show_on(screen)
         clock = pygame.time.Clock()
 
-        self.pl = Player(self.level, self.level.start)
+        self.player = Player(self.level)
 
         self.menu = [
             Button(
@@ -55,7 +55,7 @@ class Game:
                 50,
                 TILE_SIZE,
                 TILE_SIZE,
-                lambda n=n: self.enter_level(f"level{n}.toml")
+                lambda n=n: self.enter_level(f"{n}.toml")
             )
             for n,x in enumerate(range(0, 1000, TILE_SIZE * 2),1)
         ]
@@ -68,18 +68,18 @@ class Game:
             elif self.state == IN_LEVEL:
                 screen.fill((0, 0, 0))
                 self.level.show_on(screen)
-                self.pl.move()
-                self.pl.show_on(screen)
+                self.player.move()
+                self.player.show_on(screen)
 
             pygame.display.flip()
             clock.tick(30)
 
-    def parse_event(self, key):
+    def parse_event(self, key: pygame.event._EventTypes):
         if self.state == IN_LEVEL:
             if key == pygame.K_ESCAPE:
                 self.state = IN_MENU
-            elif key in MOVES:
-                self.pl.path(MOVES[key])
+            elif key in MOVES and not self.player.is_moving:
+                self.player.path(MOVES[key])
 
     def check_events(self):
         for event in pygame.event.get():
