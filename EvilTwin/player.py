@@ -8,7 +8,6 @@ from .constants import SPRITES
 from .animation import SpriteAnimation
 
 VECTORS = {
-    "idle": (0, 0),
     "left": (-1, 0),
     "right": (1, 0),
     "up": (0, -1),
@@ -47,7 +46,7 @@ class BaseCharacter:
     @state.setter
     def state(self, value):
         self._state = value
-        self.dir = VECTORS[value]
+        self.dir = VECTORS.get(value, (0, 0))
         self.is_moving = value != "idle"
 
     def animate(self, idle_every=1):
@@ -103,11 +102,6 @@ class Player(BaseCharacter):
         self.xy = tuple(map(float, level.start))
         self.animation = SpriteAnimation(SPRITES / "player")
         self.finished = False
-
-    def move(self):
-        super().move()
-        if len(self.level.stars) == 0 and self.xy == self.level.end:
-            self.finished = True
 
     def __repr__(self):
         return f"Player - Current: {self.xy}, Dir: {self.dir}, moving: {self.is_moving}"

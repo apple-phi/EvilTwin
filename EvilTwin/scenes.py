@@ -114,8 +114,7 @@ class LevelScreen(Scene):
         self.enemy.move()
         self.player.animate_on(screen, idle_every=5)
         self.enemy.animate_on(screen, idle_every=5)
-        if self.player.finished:
-            self.next_scene = MenuScreen()
+        self.check_result()
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -129,3 +128,28 @@ class LevelScreen(Scene):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
                     self.enemy.state = OPPOSITES[self.player.state]
+
+    def check_result(self):
+        if (
+            self.player.stars == len(self.level.stars)
+            and self.player.xy == self.level.end
+        ):
+            self.win()
+        if (
+            self.enemy.stars > 0
+            or self.enemy.xy == self.level
+            or manhattan_dist(*self.player.xy, *self.enemy.xy) < 1
+        ):
+            self.lose()
+
+    def win(self):
+        self.enemy.state = "hit"
+        self.next_scene = TransitionBetween(self, MenuScreen())
+
+    def lose(self):
+        self.player.state = "hit"
+        self.next_scene = TransitionBetween(self, MenuScreen())
+
+
+def manhattan_dist(x1, y1, x2, y2):
+    return abs(x1 - x2) + abs(y1 - y2)
