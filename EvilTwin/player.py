@@ -22,15 +22,22 @@ MOVES = {
     pygame.K_d: "right",
 }
 
+OPPOSITES = {
+    "up": "down",
+    "down": "up",
+    "left": "right",
+    "right": "left",
+}
+
 
 class BaseCharacter:
-    def __init__(self, level: Level):
+    def __init__(self, level: Level, speed=1 / 4):
         self.level = level
+        self.speed = speed
         self.is_moving = False
-        self.dir = (0, 0)
         self.stars = 0
 
-        self._state = "idle"  # idle | left | right | up | down | rotate
+        self.state = "idle"  # idle | left | right | up | down | rotate
         self.tick = 0
 
     @property
@@ -67,19 +74,27 @@ class BaseCharacter:
         """
 
         # If currently moving
-        if all(i.is_integer() for i in self.xy):
+        if self.xy[0].is_integer() and self.xy[1].is_integer():
             self.dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
 
             # If have reached a wall, stop moving
             if self.level.wall_at(int(self.dest[1]), int(self.dest[0])):
-                self.state = "idle"
-                self.is_moving = False
-                self.dir = [0, 0]
+                self.state = "idle"  # self.state is a @property so it should auto-change self.dir and self.is_moving
 
         if self.is_moving:
-            self.xy = [self.xy[0] + 0.25 * self.dir[0], self.xy[1] + 0.25 * self.dir[1]]
+            self.xy = (
+                self.xy[0] + self.speed * self.dir[0],
+                self.xy[1] + self.speed * self.dir[1],
+            )
 
         self.stars += self.level.collect_star(*self.xy)
+
+    def can_move(self):
+        """Check if character can move in current direction,
+        assuming it is currently fully on a square."""
+        return not self.level.wall_at(
+            int(self.xy[0] + self.dir[0]), int(self.xy[1] + self.dir[1])
+        )
 
 
 class Player(BaseCharacter):
@@ -102,17 +117,4 @@ class Enemy(BaseCharacter):
     def __init__(self, level: Level):
         super().__init__(level)
         self.xy = tuple(map(float, level.end))
-        self._dir = (0, 0)
-        self.animatation = SpriteAnimation(SPRITES / "enemy")
-
-    @property
-    def dir(self):
-        return self._dir
-
-    @dir.setter
-    def dir(self, value):
-        """Set the direction to be the opposite of the player"""
-        self._dir = (-value[0], -value[1])
-
-    def move(self):
-        super().move()
+        self.animation = SpriteAnimation(SPRITES / "enemy")

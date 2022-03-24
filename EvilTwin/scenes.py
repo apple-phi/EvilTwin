@@ -5,7 +5,7 @@ import pygame
 
 
 from .levels import Level
-from .player import Player, MOVES
+from .player import Enemy, Player, MOVES, OPPOSITES
 from .constants import LEVELS, TILE_SIZE
 
 
@@ -68,11 +68,14 @@ class LevelScreen(Scene):
         super().__init__()
         self.level = Level(path)
         self.player = Player(self.level)
+        self.enemy = Enemy(self.level)
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
         self.player.move()
+        self.enemy.move()
         self.player.animate_on(screen, idle_every=5)
+        self.enemy.animate_on(screen, idle_every=5)
         if self.player.finished:
             self.next_scene = MenuScreen()
 
@@ -80,5 +83,11 @@ class LevelScreen(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = MenuScreen()
-            elif event.key in MOVES and not self.player.is_moving:
+            elif (
+                event.key in MOVES
+                and not self.player.is_moving
+                and not self.enemy.is_moving
+            ):
                 self.player.state = MOVES[event.key]
+                if self.player.can_move():
+                    self.enemy.state = OPPOSITES[self.player.state]
