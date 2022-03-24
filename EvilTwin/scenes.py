@@ -55,12 +55,14 @@ class TransitionBetween(Scene):
         self.veil.fill((0, 0, 0))
 
     def update_alpha(self) -> float:
-        """Make quadratic through (0, 0) -> (d/2, 1) -> (d, 0)
+        """Make quartic through (0, 0) -> (d/2, 1) -> (d, 0)
 
-        y=255\left(1-\ 4\left(\frac{x}{d}-\frac{1}{2}\right)^{2}\right)
+        y=\left(\frac{4x\left(x-d\right)}{d^{2}}\right)^{2}
         """
         return self.veil.set_alpha(
-            255 * (1 - 4 * (self.elapsed / self.duration - 0.5) ** 2)
+            255
+            * (4 * self.elapsed * (self.elapsed - self.duration) / self.duration ** 2)
+            ** 2
         )
 
     @property
