@@ -16,17 +16,24 @@ class Level:
         self.stars: list[list[int]] = self.data["stars"]
         self.start: list[int] = self.data["start"]
         self.end: list[int] = self.data["end"]
+        self.items: dict[str, list[int]] = self.data["items"]
         self.image = pygame.Surface(
             (
                 self.dimensions[0] * TILE_SIZE,
                 self.dimensions[1] * TILE_SIZE,
             )
         )
-        self._load_tiles()._render_tiles()._render_stars()
+        self._load_all()._render_all()
+
+    def _load_all(self) -> "Level":
+        return self._load_tiles()._load_items()
+
+    def _render_all(self) -> "Level":
+        return self._render_tiles()._render_items()._render_stars()
 
     def _load_tiles(self) -> "Level":
         self.tileset = {}
-        for _, tile in np.ndenumerate(self.array):
+        for tile in self.array.flatten():
             if tile not in self.tileset:
                 self.tileset[tile] = pygame.image.load(TILES / f"{tile}.png")
         return self
@@ -40,8 +47,23 @@ class Level:
         )
         return self
 
+    def _load_items(self) -> "Level":
+        self.itemset = {}
+        for item in self.items:
+            if item not in self.itemset:
+                self.itemset[item] = pygame.image.load(TILES / f"{item}.png")
+        return self
+
+    def _render_items(self) -> "Level":
+        self.image.blits(
+            [
+                (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
+                for item, (x, y) in self.items.items()
+            ]
+        )
+        return self
+
     def _render_stars(self) -> "Level":
-        self._render_tiles()
         self.image.blits(
             [
                 (
@@ -51,11 +73,12 @@ class Level:
                 for x, y in self.stars
             ]
         )
+        return self
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
             self.stars.remove([x, y])
-            self._render_stars()
+            self._render_all()
             return True
         return False
 
@@ -75,7 +98,12 @@ class Level:
         )
 
     def wall_at(self, x, y):
-        return self.array[y, x] in WALLS
+        return (
+            x not in range(self.dimensions[1])
+            or y not in range(self.dimensions[1])
+            or self.array[x, y] in WALLS
+            or [y, x] in self.items.values()
+        )
 
     def star_at(self, coords):
         return coords in self.stars
