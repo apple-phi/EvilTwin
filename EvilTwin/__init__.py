@@ -1,9 +1,8 @@
 import sys
-from .constants import *
 
 import pygame
 
-from .constants import LEVELS, TILE_SIZE
+from .constants import STAR_SPRITE
 from .scenes import MenuScreen
 
 
