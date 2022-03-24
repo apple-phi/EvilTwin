@@ -2,6 +2,7 @@ import pathlib
 import sys
 from random import randint
 from typing import Callable
+from .constants import *
 
 import pygame
 
@@ -42,6 +43,8 @@ class Button:
 class Game:
     def __init__(self):
         screen = pygame.display.set_mode((640, 480), pygame.SCALED)
+        pygame.display.set_caption("Game Name")
+        pygame.display.set_icon(STAR_SPRITE)
         self.level = Level(LEVELS / "1.toml")
         self.state = IN_MENU
         self.level.show_on(screen)
@@ -66,10 +69,12 @@ class Game:
                 for b in self.menu:
                     b.display(screen)
             elif self.state == IN_LEVEL:
-                screen.fill((0, 0, 0))
                 self.level.show_on(screen)
                 self.player.move()
                 self.player.animate_on(screen, idle_every=5)
+
+                if self.player.finished:
+                    self.state = IN_MENU
 
             pygame.display.flip()
             clock.tick(30)

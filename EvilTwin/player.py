@@ -28,6 +28,8 @@ class Player:
         self.animation = SpriteAnimation(SPRITES / "player")
         self.tick = 0
 
+        self.finished = False
+
     @property
     def state(self):
         return self._state
@@ -63,7 +65,7 @@ class Player:
 
         # If currently moving
         if self.is_moving:
-            trial_dest = (self.xy[0] + self.dir[0], self.xy[1] + self.dir[1])
+            trial_dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
 
             # If have reached a wall, stop moving
             if self.level.wall_at(trial_dest[1], trial_dest[0]):
@@ -75,6 +77,9 @@ class Player:
                 self.xy = trial_dest
             
         self.level.collect_star(self.xy[0], self.xy[1])
+
+        if len(self.level.stars) == 0 and self.xy == self.level.end:
+            self.finished = True
 
 
     def __repr__(self):

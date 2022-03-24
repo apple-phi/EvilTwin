@@ -32,7 +32,6 @@ class Level:
         return self
 
     def _render_tiles(self) -> "Level":
-        self.image.fill((0, 0, 0))
         self.image.blits(
             [
                 (self.tileset[tile], (x * TILE_SIZE, y * TILE_SIZE))
