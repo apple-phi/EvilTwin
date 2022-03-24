@@ -13,9 +13,9 @@ class Level:
             self.data = toml.load(f)
         self.array = np.loadtxt(io.StringIO(self.data["map"]), delimiter=",", dtype=str)
         self.dimensions = self.array.shape[::-1]
-        self.stars = self.data["stars"]
-        self.start = self.data["start"]
-        self.end = self.data["end"]
+        self.stars: list[list[int]] = self.data["stars"]
+        self.start: list[int] = self.data["start"]
+        self.end: list[int] = self.data["end"]
         self.image = pygame.Surface(
             (
                 self.dimensions[0] * TILE_SIZE,
@@ -51,6 +51,16 @@ class Level:
                 for x, y in self.stars
             ]
         )
+
+    def check_for_star(self, x, y) -> "Level":
+        if [x, y] in self.stars:
+            self.stars.remove([x, y])
+            self._render_stars()
+        return self
+
+    @property
+    def stars_found(self) -> int:
+        return 3 - len(self.stars)
 
     def show_on(self, screen):
         """Render level tilemap, scaled to the screen size."""
