@@ -19,10 +19,10 @@ VECTORS = {
 class Player:
     def __init__(self, level: Level):
         self.level = level
-        self.xy = level.start
+        self.xy = list(map(float, level.start))
         self.dest = self.xy
         self.is_moving = False
-        self.dir = (0, 0)
+        self.dir = [0, 0]
 
         self._state = "idle"  # idle | left | right | up | down | rotate
         self.animation = SpriteAnimation(SPRITES / "player")
@@ -64,19 +64,19 @@ class Player:
         """
 
         # If currently moving
-        if self.is_moving:
-            trial_dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
+        if all(i.is_integer() for i in self.xy):
+            self.dest = [self.xy[0] + self.dir[0], self.xy[1] + self.dir[1]]
 
             # If have reached a wall, stop moving
-            if self.level.wall_at(trial_dest[1], trial_dest[0]):
+            if self.level.wall_at(int(self.dest[1]), int(self.dest[0])):
                 self.state = "idle"
                 self.is_moving = False
+                self.dir = [0, 0]
 
-            # Else, move
-            else:
-                self.xy = trial_dest
+        if self.is_moving:
+            self.xy = [self.xy[0] + 0.25 * self.dir[0], self.xy[1] + 0.25 * self.dir[1]]
             
-        self.level.collect_star(self.xy[0], self.xy[1])
+        self.level.collect_star(*self.xy)
 
         if len(self.level.stars) == 0 and self.xy == self.level.end:
             self.finished = True
