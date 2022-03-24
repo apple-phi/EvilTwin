@@ -16,7 +16,7 @@ class Level:
         self.stars: list[list[int]] = self.data["stars"]
         self.start: list[int] = self.data["start"]
         self.end: list[int] = self.data["end"]
-        self.items: dict[str, list[int]] = self.data["items"]
+        self.items: dict[str, list[list[int]]] = self.data["items"]
         self.image = pygame.Surface(
             (
                 self.dimensions[0] * TILE_SIZE,
@@ -58,7 +58,8 @@ class Level:
         self.image.blits(
             [
                 (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
-                for item, (x, y) in self.items.items()
+                for item, positions in self.items.items()
+                for x,y in positions
             ]
         )
         return self

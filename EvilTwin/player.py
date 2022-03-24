@@ -48,6 +48,7 @@ class BaseCharacter:
         self._state = value
         self.dir = VECTORS.get(value, (0, 0))
         self.is_moving = value != "idle"
+        print(self.__class__.__name__,self._state,self.dir,self.is_moving)
 
     def animate(self, idle_every=1):
         if self.tick == 0 or self.state != "idle":
@@ -92,7 +93,7 @@ class BaseCharacter:
         """Check if character can move in current direction,
         assuming it is currently fully on a square."""
         return not self.level.wall_at(
-            int(self.xy[0] + self.dir[0]), int(self.xy[1] + self.dir[1])
+            int(self.xy[1] + self.dir[1]), int(self.xy[0] + self.dir[0])
         )
 
 

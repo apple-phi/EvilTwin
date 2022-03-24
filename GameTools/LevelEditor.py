@@ -150,8 +150,10 @@ class Game():
                         self.Map.enemy = None
                     self.to_change.append(coord)
                 elif self.mode == "Player":
+                    if self.Map.player: self.to_change.append(self.Map.player)
                     self.Map.player = list(coord)
                 elif self.mode == "Enemy":
+                    if self.Map.enemy: self.to_change.append(self.Map.enemy)
                     self.Map.enemy = list(coord)
                 elif self.mode == "Star":
                     if not list(coord) in self.Map.stars:
