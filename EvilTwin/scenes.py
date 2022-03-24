@@ -65,7 +65,6 @@ class MenuScreen(Scene):
 
 class LevelScreen(Scene):
     def __init__(self, path: str):
-        print(path)
         super().__init__()
         self.level = Level(path)
         self.player = Player(self.level)
@@ -74,7 +73,6 @@ class LevelScreen(Scene):
         self.level.show_on(screen)
         self.player.move()
         self.player.animate_on(screen, idle_every=5)
-        print(self.player.xy)
         if self.player.finished:
             self.next_scene = MenuScreen()
 
