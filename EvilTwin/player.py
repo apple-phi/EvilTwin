@@ -5,9 +5,9 @@ from .levels import TILE_SIZE, Level
 
 
 class Player:
-    def __init__(self, level: Level, coords, is_enemy=False):
+    def __init__(self, level: Level, is_enemy=False):
         self.level = level
-        self.xy = coords
+        self.xy = level.start
         self.is_enemy = is_enemy
         self.dest = self.xy
 
