@@ -21,7 +21,7 @@ class Game:
                 self.scene = self.scene.next_scene
             self.scene.show_on(self.screen)
             pygame.display.flip()
-            clock.tick(30)
+            clock.tick(40)
 
     def handle_events(self):
         for event in pygame.event.get():
