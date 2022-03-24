@@ -28,8 +28,7 @@ class Level:
         self.tileset = {}
         for _, tile in np.ndenumerate(self.array):
             if tile not in self.tileset:
-                with open(TILES / f"{tile}.png") as f:
-                    self.tileset[tile] = pygame.image.load(f)
+                self.tileset[tile] = pygame.image.load(TILES / f"{tile}.png")
         return self
 
     def _render_tiles(self) -> "Level":
@@ -52,11 +51,12 @@ class Level:
             ]
         )
 
-    def check_for_star(self, x, y) -> "Level":
+    def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
             self.stars.remove([x, y])
             self._render_stars()
-        return self
+            return True
+        return False
 
     @property
     def stars_found(self) -> int:
