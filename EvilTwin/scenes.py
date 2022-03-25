@@ -1,4 +1,5 @@
 import abc
+import math
 from random import randint
 
 import pygame
@@ -6,7 +7,7 @@ import pygame
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, TILE_SIZE
+from .constants import LEVELS, TILE_SIZE, ASSETS
 
 
 class Button:
@@ -79,6 +80,45 @@ class TransitionBetween(Scene):
 
     def handle_event(self, event):
         self.current_scene.handle_event(event)
+
+
+class TitleScreen(Scene):
+    title_font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 120)
+    subtitle_font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
+
+    def __init__(self):
+        super().__init__()
+        self.tick = 0
+        self.image = pygame.display.get_surface()
+        top_half = pygame.surface.Surface(
+            (self.image.get_width(), self.image.get_height() / 2)
+        )
+        bottom_half = top_half.copy()
+        top_half.fill((225, 124, 183))
+        top_half.blit(self.title_font.render("Mirror", False, (24, 33, 93)), (104, 290))
+        bottom_half.fill((24, 33, 93))
+        bottom_half.blit(
+            self.title_font.render("Mirror", False, (225, 124, 183)), (104, 290)
+        )
+        self.image.blit(bottom_half, (0, 0))
+        self.image = pygame.transform.rotate(self.image, 180)
+        self.image.blit(top_half, (0, 0))
+        self.subtitle = self.subtitle_font.render(
+            "Click anywhere to start", False, (246, 224, 200)
+        )
+
+    def show_on(self, screen: pygame.Surface):
+        screen.blit(self.image, (0, 0))
+        self.subtitle.set_alpha(round(255 * math.cos(self.tick / 30) ** 2))
+        self.tick += 1
+        screen.blit(
+            self.subtitle,
+            (150, 550),
+        )
+
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.next_scene = TransitionBetween(self, MenuScreen())
 
 
 class MenuScreen(Scene):
