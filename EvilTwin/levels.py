@@ -12,6 +12,7 @@ from .constants import (
     STAR_SPRITE,
     TILES,
     WALLS,
+    ITEMS,
 )
 
 
@@ -125,7 +126,7 @@ class Level:
             not 0 <= x < self.dimensions[1]
             or not 0 <= y < self.dimensions[1]
             or self.array[x, y] in WALLS
-            or [y, x] in self.items.values()
+            or any([y, x] in k for k in self.items.values())
         )
 
     def star_at(self, coords):
