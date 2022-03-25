@@ -13,11 +13,13 @@ exec('from constants import TILES,WALLS,ITEMS')#so linter doesnt cry
 
 class Game():
     def __init__(self):
-        self.path = pathlib.Path(__file__).parent.absolute()
+        self.path = pathlib.Path(__file__).parent
+        print(self.path)
 
         #filepath = self.path + "/GameStuff/ARRAY.txt"
-        #filepath = self.path.parent/"EvilTwin/assets/levels/1.toml"
-        filepath = self.path / "maze2.toml"
+        filepath = (self.path.parent/"EvilTwin/assets/levels/1.toml").absolute()
+        #filepath = self.path / "maze2.toml"
+        print(filepath)
 
         self.GS = Stats()
         self.Map = Map(filepath,ITEMS,WALLS[0])
