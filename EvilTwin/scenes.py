@@ -161,7 +161,7 @@ class LevelButton:
 
     def clickable_at(self, x, y) -> bool:
         return (
-            self.unlocked
+            True#self.unlocked
             and self.x <= x <= self.x + self.w
             and self.y <= y <= self.y + self.h
         )
@@ -228,7 +228,7 @@ class LevelScreen(Scene):
             elif (
                 event.key in MOVES
                 and not self.player.is_moving
-                and not self.enemy.is_moving
+                #and not self.enemy.is_moving
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():

@@ -10,15 +10,15 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent/'EvilTwin'))
 #dont worry about it, it just works
 TILES, WALLS, ITEMS = '', ..., []
 exec('from constants import TILES,WALLS,ITEMS')#so linter doesnt cry
-
+TILENUM = 104
 class Game():
     def __init__(self):
         self.path = pathlib.Path(__file__).parent
         print(self.path)
 
         #filepath = self.path + "/GameStuff/ARRAY.txt"
-        filepath = (self.path.parent/"EvilTwin/assets/levels/1.toml").absolute()
-        #filepath = self.path / "maze2.toml"
+        #filepath = (self.path.parent/"EvilTwin/assets/levels/1.toml").absolute()
+        filepath = self.path / "maze2.toml"
         print(filepath)
 
         self.GS = Stats()
@@ -37,9 +37,9 @@ class Game():
 
         self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
 
-        self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(104)}
+        self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(TILENUM)}
         tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",self.actual_width:"Save"}
-        self.cols = {(n%13+1,n//13+1):f'{n:03d}' for n in range(104)}
+        self.cols = {(n%13+1,n//13+1):f'{n:03d}' for n in range(TILENUM)}
         pygame.init()
 
         for x, y in itertools.product(range(1,self.actual_width+1), range(1,9)):

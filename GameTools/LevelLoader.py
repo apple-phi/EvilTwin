@@ -25,7 +25,7 @@ class Map:
                     data["items"][k] = [[i+1,j+1] for i,j in v]
                 self.player = [data["start"][0]+1,data["start"][1]+1]
                 self.enemy = [data["end"][0]+1,data["end"][1]+1]
-                self.stars = [[i-1,j-1] for i,j in data["stars"]]
+                self.stars = [[i+1,j+1] for i,j in data["stars"]]
                 return [j.strip().split(",") for j in data['map'].split()], data['items']
         except FileNotFoundError:
             print("generating new file")
