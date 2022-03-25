@@ -275,7 +275,17 @@ class LevelScreen(Scene):
     def lose(self):
         self.player.state = "hit"
         self.winner = self.enemy
-        self.next_scene = FadeToBlackBetween(self, LevelScreen(self.number))
+        self.next_scene = LoseAnimation(
+            self, FadeToBlackBetween(self, LevelScreen(self.number))
+        )
+
+
+class LoseAnimation(Transition):
+    def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
+        if self.fraction_elapsed > 0.3:
+            self.old.player.state = "dead"
+        self.old.show_on(screen)
 
 
 def manhattan_dist(x1, y1, x2, y2):
