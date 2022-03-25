@@ -7,7 +7,8 @@ import pygame
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, TILE_SIZE, ASSETS, TILES
+from .constants import LEVELS, ASSETS, TILES
+from .user import user_data
 
 
 class Scene(abc.ABC):
@@ -152,9 +153,18 @@ class LevelButton:
         self.scaled_image = pygame.transform.scale(self.image, (w, h))
         self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
         self.text = self.font.render(f"{level:0>2}", False, (246, 224, 200))
+        self.unlocked = user_data.unlocked(level)
+        self.stars = user_data.stars_in(level)
+        if not self.unlocked:
+            self.text.set_alpha(125)
+            self.scaled_image.set_alpha(125)
 
     def clickable_at(self, x, y) -> bool:
-        return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h
+        return (
+            self.unlocked
+            and self.x <= x <= self.x + self.w
+            and self.y <= y <= self.y + self.h
+        )
 
     def show_on(self, screen: pygame.Surface):
         screen.blit(self.scaled_image, (self.x, self.y))
