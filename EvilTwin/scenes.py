@@ -253,13 +253,7 @@ class LevelScreen(Scene):
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
-<<<<<<< HEAD
-                event.key in MOVES
-                and not self.player.is_moving
-                #and not self.enemy.is_moving
-=======
                 event.key in MOVES and not self.player.is_moving and self.winner is None
->>>>>>> 03ab8180fba05568b1fc4a066b1c6844f28723c2
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
