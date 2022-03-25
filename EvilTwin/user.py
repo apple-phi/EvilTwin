@@ -20,8 +20,9 @@ class _UserData(collections.UserDict):
     def unlocked(self, level: int) -> bool:
         return str(level - 1) in self or level == 0
 
-    def unlock(self, level: int):
-        self[str(level)] = 0
+    def complete(self, level: int, stars=0):
+        self[str(level)] = stars
+        self.save()
 
     def stars_in(self, level: int, default=None):
         return self.get(str(level), default)

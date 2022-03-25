@@ -197,7 +197,7 @@ class MenuScreen(Scene):
             for button in self.menu:
                 if button.clickable_at(x, y):
                     self.next_scene = FadeToBlackBetween(
-                        self, LevelScreen(LEVELS / f"{button.level}.toml")
+                        self, LevelScreen(button.level)
                     )
                     break
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -205,21 +205,24 @@ class MenuScreen(Scene):
 
 
 class LevelScreen(Scene):
-    def __init__(self, path: str):
+    def __init__(self, number: int):
         super().__init__()
-        self.path = path
-        self.number = int(str(path).split("\\")[-1].split(".")[0])
-        self.level = Level(path)
+        self.number = number
+        self.path = LEVELS / f"{number}.toml"
+        self.level = Level(self.path)
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
+        self.winner = None
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
-        self.player.move()
-        self.enemy.move()
-        self.player.animate_on(screen, idle_every=5)
+        if self.winner is None:
+            self.player.move()
+            self.enemy.move()
+            self.check_result()
+        print(self.player.state)
         self.enemy.animate_on(screen, idle_every=5)
-        self.check_result()
+        self.player.animate_on(screen, idle_every=5)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -229,6 +232,7 @@ class LevelScreen(Scene):
                 event.key in MOVES
                 and not self.player.is_moving
                 and not self.enemy.is_moving
+                and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
@@ -247,12 +251,14 @@ class LevelScreen(Scene):
     def win(self):
         self.enemy.state = "hit"
         self.player.state = "idle"
-        user_data.unlock(self.number)
+        self.winner = self.player
+        user_data.complete(self.number, stars=self.player.stars)
         self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
     def lose(self):
         self.player.state = "hit"
-        self.next_scene = FadeToBlackBetween(self, LevelScreen(self.path))
+        self.winner = self.enemy
+        self.next_scene = FadeToBlackBetween(self, LevelScreen(self.number))
 
 
 def manhattan_dist(x1, y1, x2, y2):
