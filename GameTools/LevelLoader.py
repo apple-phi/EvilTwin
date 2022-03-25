@@ -29,6 +29,8 @@ class Map:
                 return [j.strip().split(",") for j in data['map'].split()], data['items']
         except FileNotFoundError:
             print("generating new file")
+            self.stars = []
+            self.player, self.enemy = None, None
             return self.makeblank(10,10), {}
     def __getitem__(self,xy):
         (x,y) = xy

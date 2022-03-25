@@ -15,7 +15,7 @@ class Level:
         self.dimensions = self.array.shape[::-1]
         self.stars: list[list[int]] = self.data["stars"]
         self.start: list[int] = self.data["start"]
-        self.end: list[int] = self.data["end"]
+        self.end: tuple[int] = tuple(self.data["end"])
         self.items: dict[str, list[list[int]]] = self.data["items"]
         self.image = pygame.Surface(
             (
