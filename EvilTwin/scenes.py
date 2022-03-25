@@ -7,7 +7,7 @@ import pygame
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, ASSETS, TILES
+from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE
 from .user import user_data
 
 
@@ -154,7 +154,23 @@ class LevelButton:
         self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
         self.text = self.font.render(f"{level:0>2}", False, (246, 224, 200))
         self.unlocked = user_data.unlocked(level)
-        self.stars = user_data.stars_in(level)
+        self.stars = user_data.stars_in(level, 0)
+        star_dims = (w / 6, h / 6)
+        star_y = y + 1.2 * h - star_dims[1] / 2
+        star_centre = x + w / 2 + w / 32 - star_dims[0] / 2
+        star_sep = w / 4
+        star_positions = [
+            (star_centre - star_sep, star_y),
+            (star_centre + star_sep, star_y),
+            (star_centre, star_y),
+        ]
+        self.unlocked_stars_positions = star_positions[: self.stars]
+        self.unlocked_star_image = pygame.transform.smoothscale(STAR_SPRITE, star_dims)
+        self.locked_stars_positions = (
+            star_positions[self.stars :] if self.unlocked else []
+        )
+        self.locked_star_image = self.unlocked_star_image.copy()
+        self.locked_star_image.set_alpha(50)
         if not self.unlocked:
             self.text.set_alpha(125)
             self.scaled_image.set_alpha(125)
@@ -169,6 +185,15 @@ class LevelButton:
     def show_on(self, screen: pygame.Surface):
         screen.blit(self.scaled_image, (self.x, self.y))
         screen.blit(self.text, (self.x + self.w / 8, self.y + self.h / 2))
+        screen.blits(
+            [
+                (self.unlocked_star_image, coord)
+                for coord in self.unlocked_stars_positions
+            ]
+        )
+        screen.blits(
+            [(self.locked_star_image, coord) for coord in self.locked_stars_positions]
+        )
 
 
 class MenuScreen(Scene):
@@ -220,7 +245,6 @@ class LevelScreen(Scene):
             self.player.move()
             self.enemy.move()
             self.check_result()
-        print(self.player.state)
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
 
@@ -239,7 +263,7 @@ class LevelScreen(Scene):
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
-        if len(self.level.stars) == 0 and self.player.xy == self.level.end:
+        if self.player.xy == self.level.end:
             self.win()
         if (
             self.enemy.stars > 0
