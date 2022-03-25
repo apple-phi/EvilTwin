@@ -44,7 +44,7 @@ class Scene(abc.ABC):
         ...
 
 
-class TransitionBetween(Scene):
+class FadeToBlackBetween(Scene):
     def __init__(self, old: Scene, new: Scene, duration=50):
         super().__init__()
         self.old = old
@@ -118,7 +118,7 @@ class TitleScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            self.next_scene = TransitionBetween(self, MenuScreen())
+            self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
 
 class MenuScreen(Scene):
@@ -138,7 +138,7 @@ class MenuScreen(Scene):
             Button.run(self.menu, *pygame.mouse.get_pos())
 
     def enter_level(self, number: str):
-        self.next_scene = TransitionBetween(
+        self.next_scene = FadeToBlackBetween(
             self, LevelScreen(LEVELS / (f"{number}.toml"))
         )
 
@@ -161,7 +161,7 @@ class LevelScreen(Scene):
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.next_scene = TransitionBetween(self, MenuScreen())
+                self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
                 event.key in MOVES
                 and not self.player.is_moving
@@ -172,11 +172,8 @@ class LevelScreen(Scene):
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
-        print(self.player.xy,self.level.end)
-        if (
-            len(self.level.stars) == 0
-            and self.player.xy == self.level.end
-        ):
+        print(self.player.xy, self.level.end)
+        if len(self.level.stars) == 0 and self.player.xy == self.level.end:
             self.win()
         if (
             self.enemy.stars > 0
@@ -187,11 +184,11 @@ class LevelScreen(Scene):
 
     def win(self):
         self.enemy.state = "hit"
-        self.next_scene = TransitionBetween(self, MenuScreen())
+        self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
     def lose(self):
         self.player.state = "hit"
-        self.next_scene = TransitionBetween(self, MenuScreen())
+        self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
 
 def manhattan_dist(x1, y1, x2, y2):
