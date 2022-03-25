@@ -1,34 +1,13 @@
 import abc
 import math
-from random import randint
+import itertools
 
 import pygame
 
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, TILE_SIZE, ASSETS
-
-
-class Button:
-    def __init__(self, x: int, y: int, w: int, h: int, command):
-        self.x, self.y, self.w, self.h, self.command = x, y, w, h, command
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        col = [0, 0, 0]
-        col[randint(0, 2)] = 255
-        self.image.fill(col)
-
-    @staticmethod
-    def run(buttons: list["Button"], x, y):
-        for b in buttons:
-            if b.x <= x <= b.x + b.w and b.y <= y <= b.y + b.h:
-                b.command()
-
-    def display(self, screen: pygame.Surface):
-        screen.blit(
-            pygame.transform.scale(self.image, (self.w, self.h)),
-            (self.x, self.y),
-        )
+from .constants import LEVELS, TILE_SIZE, ASSETS, TILES
 
 
 class Scene(abc.ABC):
@@ -129,7 +108,7 @@ class TitleScreen(Scene):
     def __init__(self):
         super().__init__()
         self.tick = 0
-        self.image = pygame.display.get_surface()
+        self.image = pygame.display.get_surface().copy()
         top_half = pygame.surface.Surface(
             (self.image.get_width(), self.image.get_height() / 2)
         )
@@ -161,27 +140,60 @@ class TitleScreen(Scene):
             self.next_scene = SlideUpBetween(self, MenuScreen())
 
 
+class LevelButton:
+    image = pygame.image.load(TILES / "014.png")
+
+    def __init__(self, x: float, y: float, w: float, h: float, level: int):
+        self.x = x + w / 16  # slight offset due to shadow
+        self.y = y + h / 16
+        self.w = w
+        self.h = h
+        self.level = level
+        self.scaled_image = pygame.transform.scale(self.image, (w, h))
+        self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
+        self.text = self.font.render(f"{level:0>2}", False, (246, 224, 200))
+        # self.text_rect = self.text.get_bounding_rect()
+        # self.text_rect.center = x + w / 2, y + h / 2
+
+    def clickable_at(self, x, y) -> bool:
+        return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h
+
+    def show_on(self, screen: pygame.Surface):
+        screen.blit(self.scaled_image, (self.x, self.y))
+        screen.blit(self.text, (self.x + self.w / 8, self.y + self.h / 2))
+
+
 class MenuScreen(Scene):
     def __init__(self):
         super().__init__()
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+        width, height = screen_width / 6, screen_height / 6
         self.menu = [
-            Button(x, 50, TILE_SIZE, TILE_SIZE, lambda n=n: self.enter_level(n))
-            for n, x in enumerate(range(0, 1000, TILE_SIZE * 2), 1)
+            LevelButton(x, y, width, height, level)
+            for level, (y, x) in enumerate(
+                itertools.product(
+                    range(int(width / 2), screen_width, int(width * 2)),
+                    range(int(height / 2), screen_height, int(height * 2)),
+                ),
+            )
         ]
 
     def show_on(self, screen: pygame.Surface):
         screen.fill((24, 33, 93))
         for b in self.menu:
-            b.display(screen)
+            b.show_on(screen)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            Button.run(self.menu, *pygame.mouse.get_pos())
-
-    def enter_level(self, number: str):
-        self.next_scene = FadeToBlackBetween(
-            self, LevelScreen(LEVELS / (f"{number}.toml"))
-        )
+            x, y = pygame.mouse.get_pos()
+            for button in self.menu:
+                if button.clickable_at(x, y):
+                    self.next_scene = FadeToBlackBetween(
+                        self, LevelScreen(LEVELS / f"{button.level}.toml")
+                    )
+                    break
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.next_scene = FadeToBlackBetween(self, TitleScreen())
 
 
 class LevelScreen(Scene):

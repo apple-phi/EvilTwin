@@ -5,7 +5,7 @@ import pygame
 pygame.init()
 
 from .constants import STAR_SPRITE
-from .scenes import MenuScreen, TitleScreen
+from .scenes import TitleScreen
 
 
 class Game:
