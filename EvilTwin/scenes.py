@@ -208,6 +208,7 @@ class LevelScreen(Scene):
     def __init__(self, path: str):
         super().__init__()
         self.path = path
+        self.number = int(str(path).split("\\")[-1].split(".")[0])
         self.level = Level(path)
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
@@ -245,6 +246,8 @@ class LevelScreen(Scene):
 
     def win(self):
         self.enemy.state = "hit"
+        self.player.state = "idle"
+        user_data.unlock(self.number)
         self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
     def lose(self):
