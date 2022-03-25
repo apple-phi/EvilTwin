@@ -152,8 +152,6 @@ class LevelButton:
         self.scaled_image = pygame.transform.scale(self.image, (w, h))
         self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
         self.text = self.font.render(f"{level:0>2}", False, (246, 224, 200))
-        # self.text_rect = self.text.get_bounding_rect()
-        # self.text_rect.center = x + w / 2, y + h / 2
 
     def clickable_at(self, x, y) -> bool:
         return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h

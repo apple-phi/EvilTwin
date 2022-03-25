@@ -59,7 +59,7 @@ class Level:
             [
                 (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
                 for item, positions in self.items.items()
-                for x,y in positions
+                for x, y in positions
             ]
         )
         return self
