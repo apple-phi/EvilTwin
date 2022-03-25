@@ -2,6 +2,7 @@ import pathlib
 import itertools
 import pygame
 import random
+import functools
 
 from .constants import SPRITES, STAR_FRACTION, TILE_SIZE
 
@@ -22,6 +23,7 @@ class SpriteAnimation:
         images = [pygame.image.load(entry) for entry in directory.iterdir()]
         self.animations[directory.stem] = images
 
+    @functools.lru_cache
     def __getitem__(self, key):
         return itertools.cycle(self.animations[key])
 
