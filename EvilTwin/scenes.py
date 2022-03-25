@@ -241,9 +241,9 @@ class LevelScreen(Scene):
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
+        self.enemy.move()
         if self.winner is None:
             self.player.move()
-            self.enemy.move()
             self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
@@ -253,10 +253,7 @@ class LevelScreen(Scene):
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
-                event.key in MOVES
-                and not self.player.is_moving
-                and not self.enemy.is_moving
-                and self.winner is None
+                event.key in MOVES and not self.player.is_moving and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
@@ -265,11 +262,7 @@ class LevelScreen(Scene):
     def check_result(self):
         if self.player.xy == self.level.end:
             self.win()
-        if (
-            self.enemy.stars > 0
-            or self.enemy.xy == self.level
-            or manhattan_dist(*self.player.xy, *self.enemy.xy) < 1
-        ):
+        if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
             self.lose()
 
     def win(self):
