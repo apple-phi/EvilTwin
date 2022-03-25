@@ -4,7 +4,15 @@ import pygame
 import numpy as np
 import toml
 
-from .constants import TILE_SIZE, STAR_OFFSET, STAR_SPRITE, TILES, WALLS
+from .animation import StarAnimation
+from .constants import (
+    STAR_FRAME_DELAY,
+    TILE_SIZE,
+    STAR_OFFSET,
+    STAR_SPRITE,
+    TILES,
+    WALLS,
+)
 
 
 class Level:
@@ -23,7 +31,9 @@ class Level:
                 self.dimensions[1] * TILE_SIZE,
             )
         )
-        self._load_all()._render_all()
+        self.star_animations = [StarAnimation()["rotate-mini"] for _ in self.stars]
+        self.tick = 0
+        self._load_all()._update_stars()._render_all()
 
     def _load_all(self) -> "Level":
         return self._load_tiles()._load_items()
@@ -64,14 +74,18 @@ class Level:
         )
         return self
 
+    def _update_stars(self) -> "Level":
+        self.star_frames = [next(anim) for anim in self.star_animations]
+        return self
+
     def _render_stars(self) -> "Level":
         self.image.blits(
             [
                 (
-                    STAR_SPRITE,
+                    frame,
                     (x * TILE_SIZE + STAR_OFFSET, y * TILE_SIZE + STAR_OFFSET),
                 )
-                for x, y in self.stars
+                for (x, y), frame in zip(self.stars, self.star_frames)
             ]
         )
         return self
@@ -89,7 +103,11 @@ class Level:
 
     def show_on(self, screen):
         """Render level tilemap, scaled to the screen size."""
+        if self.tick % STAR_FRAME_DELAY == 0:
+            self._update_stars()
+        self._render_all()
         pygame.transform.scale(self.image, screen.get_size(), screen)
+        self.tick += 1
         return self
 
     def get_screen(self, size, **kwargs) -> pygame.Surface:
