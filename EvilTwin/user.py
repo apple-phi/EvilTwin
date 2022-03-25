@@ -18,7 +18,10 @@ class _UserData(collections.UserDict):
             toml.dump(self.data, f)
 
     def unlocked(self, level: int) -> bool:
-        return str(level - 1) in self or level == 0
+        return self.completed(level - 1) or level == 0
+
+    def completed(self, level: int) -> bool:
+        return str(level) in self
 
     def complete(self, level: int, stars=0):
         self[str(level)] = stars

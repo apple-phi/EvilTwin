@@ -167,7 +167,7 @@ class LevelButton:
         self.unlocked_stars_positions = star_positions[: self.stars]
         self.unlocked_star_image = pygame.transform.smoothscale(STAR_SPRITE, star_dims)
         self.locked_stars_positions = (
-            star_positions[self.stars :] if self.unlocked else []
+            star_positions[self.stars :] if user_data.completed(level) else []
         )
         self.locked_star_image = self.unlocked_star_image.copy()
         self.locked_star_image.set_alpha(50)
