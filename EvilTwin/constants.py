@@ -66,10 +66,10 @@ WALLS = """
 """.split()
 
 ITEMS = [
-    "0" + str(int(x) - 1)
+    f"0{int(x)-1}"
     for x in """\
 13
-25 26
+24 25 26
 37 38 39
 50
 61 62 63 64 65
@@ -77,3 +77,5 @@ ITEMS = [
 80 81 87
 """.split()
 ]
+
+WALLS += ITEMS
