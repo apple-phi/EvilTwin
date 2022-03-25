@@ -207,6 +207,7 @@ class MenuScreen(Scene):
 class LevelScreen(Scene):
     def __init__(self, path: str):
         super().__init__()
+        self.path = path
         self.level = Level(path)
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
@@ -248,7 +249,7 @@ class LevelScreen(Scene):
 
     def lose(self):
         self.player.state = "hit"
-        self.next_scene = FadeToBlackBetween(self, MenuScreen())
+        self.next_scene = FadeToBlackBetween(self, LevelScreen(self.path))
 
 
 def manhattan_dist(x1, y1, x2, y2):
