@@ -48,7 +48,6 @@ class BaseCharacter:
         self._state = value
         self.dir = VECTORS.get(value, (0, 0))
         self.is_moving = value != "idle"
-        print(self.__class__.__name__,self._state,self.dir,self.is_moving)
 
     def animate(self, idle_every=1):
         if self.tick == 0 or self.state != "idle":

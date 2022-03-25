@@ -223,7 +223,6 @@ class LevelScreen(Scene):
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
-        print(self.player.xy, self.level.end)
         if len(self.level.stars) == 0 and self.player.xy == self.level.end:
             self.win()
         if (
