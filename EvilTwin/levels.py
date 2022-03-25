@@ -46,8 +46,8 @@ class Level:
             ]
         )
         self.image.blits([
-            (pygame.image.load(TILES / "081.png"), (self.start[0] * TILE_SIZE, self.start[1] * TILE_SIZE)),
-            (pygame.image.load(TILES / "082.png"), (self.end[0] * TILE_SIZE, self.end[1] * TILE_SIZE))
+            (pygame.image.load(TILES / "entrance.png"), (self.start[0] * TILE_SIZE, self.start[1] * TILE_SIZE)),
+            (pygame.image.load(TILES / "exit.png"), (self.end[0] * TILE_SIZE, self.end[1] * TILE_SIZE))
         ])
         return self
 
