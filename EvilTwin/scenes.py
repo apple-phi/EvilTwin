@@ -44,7 +44,7 @@ class Scene(abc.ABC):
         ...
 
 
-class FadeToBlackBetween(Scene):
+class Transition(Scene):
     def __init__(self, old: Scene, new: Scene, duration=50):
         super().__init__()
         self.old = old
@@ -52,6 +52,55 @@ class FadeToBlackBetween(Scene):
         self.scenes = old, new
         self.duration = duration
         self.elapsed = 0
+
+    @property
+    def fraction_elapsed(self):
+        return self.elapsed / self.duration
+
+    @property
+    def current_scene(self) -> Scene:
+        return self.scenes[self.fraction_elapsed > 0.5]
+
+    def handle_event(self, event):
+        self.current_scene.handle_event(event)
+
+    def show_on(self, screen: pygame.Surface):
+        self.elapsed += 1
+        if self.fraction_elapsed >= 1:
+            self.next_scene = self.new
+
+
+class SlideUpBetween(Transition):
+    def __init__(self, old: Scene, new: Scene, duration=50):
+        super().__init__(old, new, duration)
+        self.image_old = pygame.display.get_surface().copy()
+        self.image_new = self.image_old.copy()
+        self.image = self.image_new.copy()
+
+    @property
+    def fractional_offset(self):
+        """Make cubic with turning points at (0, 0) & (d, 1).
+
+        y=-\frac{2}{d^{3}}x^{3}+\frac{3}{d^{2}}x^{2}
+        """
+        return -2 * self.fraction_elapsed ** 3 + 3 * self.fraction_elapsed ** 2
+
+    def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
+        self.old.show_on(self.image_old)
+        self.new.show_on(self.image_new)
+        self.image.blit(
+            self.image_old, (0, -screen.get_height() * self.fractional_offset)
+        )
+        self.image.blit(
+            self.image_new, (0, screen.get_height() * (1 - self.fractional_offset))
+        )
+        screen.blit(self.image, (0, 0))
+
+
+class FadeToBlackBetween(Transition):
+    def __init__(self, old: Scene, new: Scene, duration=50):
+        super().__init__(old, new, duration)
         self.veil = pygame.display.get_surface().copy()
         self.veil.fill((0, 0, 0))
 
@@ -66,20 +115,11 @@ class FadeToBlackBetween(Scene):
             ** 2
         )
 
-    @property
-    def current_scene(self) -> Scene:
-        return self.scenes[self.elapsed > self.duration / 2]
-
     def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
         self.current_scene.show_on(screen)
         self.update_alpha()
         screen.blit(self.veil, (0, 0))
-        self.elapsed += 1
-        if self.elapsed >= self.duration:
-            self.next_scene = self.new
-
-    def handle_event(self, event):
-        self.current_scene.handle_event(event)
 
 
 class TitleScreen(Scene):
@@ -118,7 +158,7 @@ class TitleScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            self.next_scene = FadeToBlackBetween(self, MenuScreen())
+            self.next_scene = SlideUpBetween(self, MenuScreen())
 
 
 class MenuScreen(Scene):
@@ -130,6 +170,7 @@ class MenuScreen(Scene):
         ]
 
     def show_on(self, screen: pygame.Surface):
+        screen.fill((24, 33, 93))
         for b in self.menu:
             b.display(screen)
 
