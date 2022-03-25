@@ -7,7 +7,7 @@ import pygame
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, ASSETS, TILES
+from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE
 from .user import user_data
 
 
@@ -154,7 +154,23 @@ class LevelButton:
         self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
         self.text = self.font.render(f"{level:0>2}", False, (246, 224, 200))
         self.unlocked = user_data.unlocked(level)
-        self.stars = user_data.stars_in(level)
+        self.stars = user_data.stars_in(level, 0)
+        star_dims = (w / 6, h / 6)
+        star_y = y + 1.2 * h - star_dims[1] / 2
+        star_centre = x + w / 2 + w / 32 - star_dims[0] / 2
+        star_sep = w / 4
+        star_positions = [
+            (star_centre - star_sep, star_y),
+            (star_centre + star_sep, star_y),
+            (star_centre, star_y),
+        ]
+        self.unlocked_stars_positions = star_positions[: self.stars]
+        self.unlocked_star_image = pygame.transform.smoothscale(STAR_SPRITE, star_dims)
+        self.locked_stars_positions = (
+            star_positions[self.stars :] if user_data.completed(level) else []
+        )
+        self.locked_star_image = self.unlocked_star_image.copy()
+        self.locked_star_image.set_alpha(50)
         if not self.unlocked:
             self.text.set_alpha(125)
             self.scaled_image.set_alpha(125)
@@ -169,6 +185,15 @@ class LevelButton:
     def show_on(self, screen: pygame.Surface):
         screen.blit(self.scaled_image, (self.x, self.y))
         screen.blit(self.text, (self.x + self.w / 8, self.y + self.h / 2))
+        screen.blits(
+            [
+                (self.unlocked_star_image, coord)
+                for coord in self.unlocked_stars_positions
+            ]
+        )
+        screen.blits(
+            [(self.locked_star_image, coord) for coord in self.locked_stars_positions]
+        )
 
 
 class MenuScreen(Scene):
@@ -197,7 +222,7 @@ class MenuScreen(Scene):
             for button in self.menu:
                 if button.clickable_at(x, y):
                     self.next_scene = FadeToBlackBetween(
-                        self, LevelScreen(LEVELS / f"{button.level}.toml")
+                        self, LevelScreen(button.level)
                     )
                     break
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -205,54 +230,68 @@ class MenuScreen(Scene):
 
 
 class LevelScreen(Scene):
-    def __init__(self, path: str):
+    def __init__(self, number: int):
         super().__init__()
-        self.path = path
-        self.number = int(str(path).split("\\")[-1].split(".")[0])
-        self.level = Level(path)
+        self.number = number
+        self.path = LEVELS / f"{number}.toml"
+        self.level = Level(self.path)
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
+        self.winner = None
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
-        self.player.move()
         self.enemy.move()
-        self.player.animate_on(screen, idle_every=5)
+        if self.winner is None:
+            self.player.move()
+            self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
-        self.check_result()
+        self.player.animate_on(screen, idle_every=5)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
+<<<<<<< HEAD
                 event.key in MOVES
                 and not self.player.is_moving
                 #and not self.enemy.is_moving
+=======
+                event.key in MOVES and not self.player.is_moving and self.winner is None
+>>>>>>> 03ab8180fba05568b1fc4a066b1c6844f28723c2
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
-        if len(self.level.stars) == 0 and self.player.xy == self.level.end:
+        if self.player.xy == self.level.end:
             self.win()
-        if (
-            self.enemy.stars > 0
-            or self.enemy.xy == self.level
-            or manhattan_dist(*self.player.xy, *self.enemy.xy) < 1
-        ):
+        if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
             self.lose()
 
     def win(self):
         self.enemy.state = "hit"
         self.player.state = "idle"
-        user_data.unlock(self.number)
+        self.winner = self.player
+        user_data.complete(self.number, stars=self.player.stars)
         self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
     def lose(self):
         self.player.state = "hit"
-        self.next_scene = FadeToBlackBetween(self, LevelScreen(self.path))
+        self.winner = self.enemy
+        self.next_scene = LoseAnimation(
+            self, FadeToBlackBetween(self, LevelScreen(self.number))
+        )
+
+
+class LoseAnimation(Transition):
+    def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
+        if self.fraction_elapsed > 0.3:
+            self.old.player.state = "dead"
+        self.old.show_on(screen)
 
 
 def manhattan_dist(x1, y1, x2, y2):
