@@ -2,16 +2,18 @@ import sys
 
 import pygame
 
+pygame.init()
+
 from .constants import STAR_SPRITE
-from .scenes import MenuScreen
+from .scenes import TitleScreen
 
 
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((700, 700), pygame.SCALED)
-        pygame.display.set_caption("Game Name")
+        pygame.display.set_caption("Mirror Mirror")
         pygame.display.set_icon(STAR_SPRITE)
-        self.scene = MenuScreen()
+        self.scene = TitleScreen()
 
     def run(self):
         clock = pygame.time.Clock()

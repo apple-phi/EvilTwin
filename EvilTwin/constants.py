@@ -7,13 +7,11 @@ TILES = ASSETS / "tiles"
 SPRITES = ASSETS / "sprites"
 
 TILE_SIZE = 16
-STAR_FRACTION = 0.5
-STAR_SPRITE = pygame.transform.scale(
-    pygame.image.load(SPRITES / "star.png"),
-    (TILE_SIZE * STAR_FRACTION, TILE_SIZE * STAR_FRACTION),
-)
-STAR_OFFSET = (0.5 - STAR_FRACTION / 2 - 1 / 16) * TILE_SIZE
+STAR_FRACTION = 0.6
+STAR_SPRITE = pygame.image.load(SPRITES / "star" / "basic.png")
 
+STAR_OFFSET = (0.5 - STAR_FRACTION / 2 - 1 / 16) * TILE_SIZE
+STAR_FRAME_DELAY = 5
 
 WALLS = """
 000
@@ -49,6 +47,7 @@ WALLS = """
 057
 058
 059
+065
 066
 067
 068
@@ -67,12 +66,17 @@ WALLS = """
 103
 """.split()
 
-ITEMS = ['0'+str(int(x)-1) for x in """\
+ITEMS = [
+    f"0{int(x)-1}"
+    for x in """\
 13
-25 26
+24 25 26
 37 38 39
 50
 61 62 63 64 65
 78
 80 81 87
-""".split()]
+""".split()
+]
+
+WALLS += ITEMS
