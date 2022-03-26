@@ -12,7 +12,7 @@ from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE, SOUNDS
 from .user import user_data
 
 CURRENT_PAGE = -1
-FURTHEST_PAGE = 1
+FURTHEST_PAGE = 0
 
 
 class Scene(abc.ABC):
@@ -269,6 +269,8 @@ class MenuScreen(Scene):
         ]
         if CURRENT_PAGE == -1:
             self.changes.pop(1)
+        elif CURRENT_PAGE == FURTHEST_PAGE:
+            self.changes.pop(0)
 
     def show_on(self, screen: pygame.Surface):
 
