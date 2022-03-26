@@ -13,6 +13,7 @@ class Map:
             stars = {[[i-1,j-1] for i,j in self.stars]}
             start = {[self.player[0]-1,self.player[1]-1]}
             end = {[self.enemy[0]-1,self.enemy[1]-1]}
+            switch = {[self.switch[0]-1,self.switch[1]-1] if self.switch else [-1,-1]}
             map = '''
             """))
             f.write("\n".join([",".join(self.array[i]) for i in range(len(self.array))]))
@@ -25,6 +26,7 @@ class Map:
                     data["items"][k] = [[i+1,j+1] for i,j in v]
                 self.player = [data["start"][0]+1,data["start"][1]+1]
                 self.enemy = [data["end"][0]+1,data["end"][1]+1]
+                self.switch = [data["switch"][0]+1,data["switch"][1]+1] if "switch" in data else None
                 self.stars = [[i+1,j+1] for i,j in data["stars"]]
                 return [j.strip().split(",") for j in data['map'].split()], data['items']
         except FileNotFoundError:

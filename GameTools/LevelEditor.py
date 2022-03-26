@@ -34,7 +34,7 @@ class Game():
         self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
 
         self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(TILENUM)}
-        tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",7:"Play",self.actual_width-1:"Load_from",self.actual_width:"Save_to"}
+        tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",7:"Switch",8:"Play",self.actual_width-1:"Load_from",self.actual_width:"Save_to"}
         self.cols = {(n%13+1,n//13+1):f'{n:03d}' for n in range(TILENUM)}
         pygame.init()
 
@@ -90,6 +90,13 @@ class Game():
                 image,
                 (self.GS.cellsize*(self.Map.player[0]-1),self.GS.cellsize*(self.Map.player[1]-1)),
             )
+        image = pygame.Surface((10,10))
+        image.fill([0,0,255])
+        if self.Map.switch:
+            self.screen.blit(
+                image,
+                (self.GS.cellsize*(self.Map.switch[0]-1),self.GS.cellsize*(self.Map.switch[1]-1)),
+            )
             
         pygame.display.flip()
 
@@ -122,10 +129,12 @@ class Game():
                 elif coord[0]==6:
                     self.mode = "Star"
                 elif coord[0]==7:
+                    self.mode = "Switch"
+                elif coord[0]==8:
                     import subprocess
                     subprocess.Popen(['py','-m','EvilTwin'])
                 elif coord[0]==self.actual_width-1:
-                    self.load_map((self.path.parent/f"EvilTwin/assets/levels/{input('ENTER FILE NAME')}.toml").absolute()) #TODO change to userlevels
+                    self.load_map((self.path.parent/f"EvilTwin/assets/levels/{input('ENTER FILE NAME: ')}.toml").absolute()) #TODO change to userlevels
                     self.blit_all()
                 elif coord[0]==self.actual_width:
                     print("SAVING FILE")
@@ -153,6 +162,8 @@ class Game():
                         self.Map.player = None
                     if coord == self.Map.enemy:
                         self.Map.enemy = None
+                    if coord == self.Map.switch:
+                        self.Map.switch = None
                     self.to_change.append(coord)
                 elif self.mode == "Player":
                     if self.Map.player: self.to_change.append(self.Map.player)
@@ -163,6 +174,11 @@ class Game():
                 elif self.mode == "Star":
                     if not list(coord) in self.Map.stars:
                         self.Map.stars.append(list(coord))
+                elif self.mode == "Switch":
+                    if self.Map.switch: self.to_change.append(self.Map.switch)
+                    self.Map.switch = list(coord)
+
+
                 elif self.mode == "Rect_select":
                     if len(self.rect_selection) == 0 and not self.prevpressed:
                         self.rect_selection = coord
