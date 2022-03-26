@@ -177,7 +177,7 @@ class LevelButton:
 
     def clickable_at(self, x, y) -> bool:
         return (
-            True#self.unlocked #TODO: Remove for final release
+            self.unlocked
             and self.x <= x <= self.x + self.w
             and self.y <= y <= self.y + self.h
         )
@@ -253,8 +253,7 @@ class LevelScreen(Scene):
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
-                event.key in MOVES and not self.player.is_moving 
-                and not self.enemy.is_moving and self.winner is None
+                event.key in MOVES and not self.player.is_moving and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
