@@ -290,6 +290,9 @@ class LevelScreen(Scene):
         self.enemy = Enemy(self.level)
         self.winner = None
 
+        pygame.mixer.music.load(SOUNDS/'battle.wav')
+        pygame.mixer.music.play(-1, 0.0)
+
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
         self.enemy.move()
@@ -298,9 +301,6 @@ class LevelScreen(Scene):
             self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
-
-        pygame.mixer.music.load(SOUNDS/'battle.wav')
-        pygame.mixer.music.play(-1, 0.0)
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -318,8 +318,10 @@ class LevelScreen(Scene):
 
     def check_result(self):
         if self.player.xy == self.level.end:
+            pygame.mixer.Sound(SOUNDS/'fx'/'scream.wav').play()
             self.win()
         if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
+            pygame.mixer.Sound(SOUNDS/'fx'/'start-level.wav').play()
             self.lose()
 
     def win(self):

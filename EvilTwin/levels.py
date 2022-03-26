@@ -13,6 +13,7 @@ from .constants import (
     TILES,
     WALLS,
     ITEMS,
+    SOUNDS,
 )
 
 
@@ -122,6 +123,7 @@ class Level:
     def flip_switch(self, x, y) -> bool:
         if (x, y) == self.switch:
             self.activated = True
+            pygame.mixer.Sound(SOUNDS/'fx'/'start-level.wav').play()
             return True
         return False
 
