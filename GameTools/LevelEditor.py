@@ -34,19 +34,9 @@ class Game():
         self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
 
         self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(TILENUM)}
-        tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",7:"Switch",8:"Play",self.actual_width-1:"Load_from",self.actual_width:"Save_to"}
+        self.tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",7:"Switch",8:"Play",self.actual_width-1:"Load_from",self.actual_width:"Save_to"}
         self.cols = {(n%13+1,n//13+1):f'{n:03d}' for n in range(TILENUM)}
         pygame.init()
-
-        for x, y in itertools.product(range(1,self.actual_width+1), range(1,9)):
-            cs = self.GS.cellsize
-            drawpos = ((x-1)*cs, (self.GS.y-1+y)*cs, cs, cs)
-            self.screen.blit(pygame.transform.scale(self.pallete[self.cols[(x,y)]],(64,64)),drawpos)
-            
-
-        for x in range(1,self.actual_width+1): #bottom bit: tool menu
-            if x in tools:
-                self.print_txt(tools[x],x,self.GS.y+9)
 
         self.blit_all()
 
@@ -221,8 +211,18 @@ class Game():
         #self.Map.makeblank(50,10)
         self.GS.x,self.GS.y = self.Map.dimensions()
         self.actual_width = max(self.GS.x,13)
+        self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
     
     def blit_all(self):
+        for x, y in itertools.product(range(1,self.actual_width+1), range(1,9)):
+            cs = self.GS.cellsize
+            drawpos = ((x-1)*cs, (self.GS.y-1+y)*cs, cs, cs)
+            self.screen.blit(pygame.transform.scale(self.pallete[self.cols[(x,y)]],(64,64)),drawpos)
+            
+
+        for x in range(1,self.actual_width+1): #bottom bit: tool menu
+            if x in self.tools:
+                self.print_txt(self.tools[x],x,self.GS.y+9)
         for x, y in itertools.product(range(1,self.GS.x+1), range(1,self.GS.y+1)):
             self.blit_tile(x,y)
 
