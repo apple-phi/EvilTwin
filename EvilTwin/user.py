@@ -24,7 +24,7 @@ class _UserData(collections.UserDict):
         return str(level) in self
 
     def complete(self, level: int, stars=0):
-        self[str(level)] = stars
+        self[str(level)] = max(stars, self.stars_in(level, 0))
         self.save()
 
     def stars_in(self, level: int, default=None):
