@@ -125,8 +125,8 @@ class Level:
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
-            s = pygame.mixer.Sound(SOUNDS / "fx" / "bonus.mp3")
-            s.set_volume(0.15)
+            s=pygame.mixer.Sound(SOUNDS/'fx'/'bonus.mp3')
+            s.set_volume(0.05)
             s.play()
             self.stars.remove([x, y])
             self._render_all()
@@ -135,10 +135,11 @@ class Level:
 
     def flip_switch(self, x, y) -> bool:
         if (x, y) == self.switch:
+            if not self.activated:
+                s=pygame.mixer.Sound(SOUNDS/'fx'/'destroyed_stones.mp3')
+                s.set_volume(0.15)
+                s.play()
             self.activated = True
-            s = pygame.mixer.Sound(SOUNDS / "fx" / "destroyed_stones.mp3")
-            s.set_volume(0.15)
-            s.play()
             return True
         return False
 
