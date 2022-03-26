@@ -224,6 +224,7 @@ class LevelButton:
         )
 
 
+
 class MenuScreen(Scene):
     def __init__(self):
         super().__init__()
@@ -290,6 +291,7 @@ class LevelScreen(Scene):
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
         self.winner = None
+        self.esc = pygame.transform.scale(pygame.image.load(TILES / "esc.png").convert_alpha(), (48, 48))
 
         pygame.mixer.music.load(SOUNDS/'battle.wav')
         pygame.mixer.music.set_volume(.05)
@@ -303,6 +305,7 @@ class LevelScreen(Scene):
             self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
+        screen.blit(self.esc, (12, 12))
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:

@@ -14,7 +14,8 @@ class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((700, 700), pygame.SCALED)
 
-        self.curs = pygame.transform.scale(pygame.image.load(TILES / "cursor.png").convert_alpha(), (16, 16))
+        self.curs = pygame.transform.flip(pygame.transform.scale(pygame.image.load(TILES / "cursor.png").convert_alpha(), (16, 16)), True, False)
+        
         w, h = self.curs.get_size()
         for x in range(w):
             for y in range(h):
