@@ -376,9 +376,9 @@ stars in our galaxy! We believe she
 is harvesting their energy to save
 her own dying universe.
 
-Your mission is to save all of the
-stars, but beware, she will always
-do the reverse of your every move.
+Your mission is to stop her and
+save all of the stars, but beware,
+she will mirror your every move.
 
 Yours truly,
 The Prince of the Snailfish
