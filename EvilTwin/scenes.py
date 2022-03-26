@@ -295,6 +295,8 @@ class LevelScreen(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
+            elif event.key == pygame.K_r:
+                self.next_scene = FadeToBlackBetween(self, LevelScreen(self.number))
             elif (
                 event.key in MOVES and not self.player.is_moving
                 and not self.enemy.is_moving and self.winner is None
