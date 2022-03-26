@@ -3,6 +3,7 @@ import math
 import itertools
 
 import pygame
+from textwrap import dedent
 
 
 from .levels import Level
@@ -12,7 +13,7 @@ from .user import user_data
 from .animation import StarAnimation
 
 CURRENT_PAGE = 0
-FURTHEST_PAGE = 1
+FURTHEST_PAGE = 0
 
 
 class Scene(abc.ABC):
@@ -232,6 +233,10 @@ class MenuScreen(Scene):
         super().__init__()
         screen_width, screen_height = pygame.display.get_surface().get_size()
         width, height = screen_width / 6, screen_height / 6
+        self.font = pygame.font.Font(
+            ASSETS / "Pixeboy-font.ttf", int(screen_height / 12)
+        )
+
         self.menu = [
             LevelButton(x, y, width, height, level + CURRENT_PAGE * 9)
             for level, (y, x) in enumerate(
@@ -248,6 +253,12 @@ class MenuScreen(Scene):
             ),
             ChangeButton(width / 6, height / 6, width / 6, height / 6, False),
         ]
+        if CURRENT_PAGE == -1:
+            self.changes.pop(1)
+        elif CURRENT_PAGE == FURTHEST_PAGE:
+            self.changes.pop(0)
+        if CURRENT_PAGE == FURTHEST_PAGE == 0:
+            self.changes = []
 
     def show_on(self, screen: pygame.Surface):
         screen.fill((24, 33, 93))
@@ -256,7 +267,7 @@ class MenuScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         global CURRENT_PAGE
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and CURRENT_PAGE > -1:
             x, y = pygame.mouse.get_pos()
             for button in self.menu:
                 if button.clickable_at(x, y):
@@ -268,18 +279,42 @@ class MenuScreen(Scene):
                 if button.clickable_at(x, y):
                     if button.right and CURRENT_PAGE < FURTHEST_PAGE:
                         CURRENT_PAGE += 1
+
                         self.next_scene = FadeToBlackBetween(self, MenuScreen())
+                    elif not button.right:
+                        CURRENT_PAGE -= 1
+                        if CURRENT_PAGE == -1:
+                            self.next_scene = MenuScreen()
+                        else:
+                            self.next_scene = FadeToBlackBetween(self, MenuScreen())
+                    break
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            for button in self.changes:
+                if button.clickable_at(x, y):
+                    if button.right and CURRENT_PAGE < FURTHEST_PAGE:
+                        CURRENT_PAGE += 1
+                        self.next_scene = FadeToBlackBetween(self, MenuScreen(), 1)
                     elif not button.right and CURRENT_PAGE > -1:
                         CURRENT_PAGE -= 1
-                        self.next_scene = FadeToBlackBetween(self, MenuScreen())
+                        if CURRENT_PAGE == -1:
+                            self.next_scene = FadeToBlackBetween(self, MenuScreen(), 1)
+                        else:
+                            self.next_scene = FadeToBlackBetween(self, MenuScreen())
                     break
+
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.mixer.music.stop()
             self.next_scene = FadeToBlackBetween(self, TitleScreen())
 
 
 class LevelScreen(Scene):
-    def __init__(self, number):
+    font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
+    text1 = font.render("Collect the stars", False, (246, 224, 200))
+    text2 = font.render("&", False, (246, 224, 200))
+    text3 = font.render("reach the end", False, (246, 224, 200))
+
+    def __init__(self, number: int):
         super().__init__()
         self.number = number
         self.path = LEVELS / f"{number}.toml"
@@ -297,6 +332,10 @@ class LevelScreen(Scene):
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
+        if self.number == 0:
+            screen.blit(self.text1, (165, 205))
+            screen.blit(self.text2, (300, 235))
+            screen.blit(self.text3, (200, 265))
         self.enemy.move()
         if self.winner is None:
             self.player.move()
@@ -452,7 +491,7 @@ The Prince of the Snailfish
         self.elapsed += 1
 
     def handle_event(self, event):
-        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 100:
+        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 150:
             self.elapsed = 0
             try:
                 self.curr_im = next(self.im_iter)
