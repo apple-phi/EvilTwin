@@ -262,7 +262,7 @@ class MenuScreen(Scene):
                         self.next_scene = FadeToBlackBetween(
                             self, MenuScreen()
                         )
-                    elif not button.right and CURRENT_PAGE > 0:
+                    elif not button.right and CURRENT_PAGE > -1:
                         CURRENT_PAGE -= 1
                         self.next_scene = FadeToBlackBetween(
                             self, MenuScreen()
