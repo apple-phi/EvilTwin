@@ -86,9 +86,14 @@ class Level:
         return self
 
     def _render_switch(self) -> "Level":
-        self.image.blit(
-            pygame.image.load(TILES / "switch.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
-        )
+        if not self.activated:
+            self.image.blit(
+                pygame.image.load(TILES / "switch_open.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+            )
+        else:
+            self.image.blit(
+                pygame.image.load(TILES / "switch_closed.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+            )
         return self
 
     def _update_stars(self) -> "Level":
