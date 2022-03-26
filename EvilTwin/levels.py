@@ -26,8 +26,10 @@ class Level:
         self.stars: list[list[int]] = self.data["stars"]
         self.start: list[int] = self.data["start"]
         self.end: tuple[int] = tuple(self.data["end"])
-        #I, Alex, take full responsibility for this crime \/
-        self.switch: tuple[int] = tuple(self.data["switch"]) if "switch" in self.data else [-1,-1]
+        # I, Alex, take full responsibility for this crime \/
+        self.switch: tuple[int] = (
+            tuple(self.data["switch"]) if "switch" in self.data else [-1, -1]
+        )
         self.activated = False
 
         self.items: dict[str, list[list[int]]] = self.data["items"]
@@ -52,20 +54,25 @@ class Level:
         for tile in self.array.flatten():
             if tile not in self.tileset:
                 self.tileset[tile] = pygame.image.load(TILES / f"{tile}.png")
-        self.tileset['005'] = pygame.image.load(TILES / "005.png")
+        self.tileset["005"] = pygame.image.load(TILES / "005.png")
         return self
 
     def _render_tiles(self) -> "Level":
         self.image.blits(
             [
-                (self.tileset[tile if tile!='004'or not self.activated else'005'], (x * TILE_SIZE, y * TILE_SIZE))
+                (
+                    self.tileset[
+                        tile if tile != "004" or not self.activated else "005"
+                    ],
+                    (x * TILE_SIZE, y * TILE_SIZE),
+                )
                 for (y, x), tile in np.ndenumerate(self.array)
             ]
         )
-        self.image.blits([
-            (pygame.image.load(TILES / "entrance.png"), (self.start[0] * TILE_SIZE, self.start[1] * TILE_SIZE)),
-            (pygame.image.load(TILES / "exit.png"), (self.end[0] * TILE_SIZE, self.end[1] * TILE_SIZE))
-        ])
+        self.image.blit(
+            pygame.image.load(TILES / "entrance.png"),
+            (self.end[0] * TILE_SIZE, self.end[1] * TILE_SIZE),
+        )
         return self
 
     def _load_items(self) -> "Level":
@@ -81,7 +88,8 @@ class Level:
                 (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
                 for item, positions in self.items.items()
                 for x, y in positions
-                if (item != '086' or self.activated) and (item != '004' or not self.activated)
+                if (item != "086" or self.activated)
+                and (item != "004" or not self.activated)
             ]
         )
         return self
@@ -89,11 +97,13 @@ class Level:
     def _render_switch(self) -> "Level":
         if not self.activated:
             self.image.blit(
-                pygame.image.load(TILES / "switch_open.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+                pygame.image.load(TILES / "switch_open.png"),
+                (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE),
             )
         else:
             self.image.blit(
-                pygame.image.load(TILES / "switch_closed.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+                pygame.image.load(TILES / "switch_closed.png"),
+                (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE),
             )
         return self
 
@@ -115,7 +125,7 @@ class Level:
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
-            s=pygame.mixer.Sound(SOUNDS/'fx'/'bonus.mp3')
+            s = pygame.mixer.Sound(SOUNDS / "fx" / "bonus.mp3")
             s.set_volume(0.15)
             s.play()
             self.stars.remove([x, y])
@@ -126,7 +136,7 @@ class Level:
     def flip_switch(self, x, y) -> bool:
         if (x, y) == self.switch:
             self.activated = True
-            s=pygame.mixer.Sound(SOUNDS/'fx'/'destroyed_stones.mp3')
+            s = pygame.mixer.Sound(SOUNDS / "fx" / "destroyed_stones.mp3")
             s.set_volume(0.15)
             s.play()
             return True
@@ -155,9 +165,12 @@ class Level:
         return (
             not 0 <= x < self.dimensions[1]
             or not 0 <= y < self.dimensions[1]
-            or self.array[x, y] in WALLS+['004']*(not self.activated)
-            or any([y, x] in v for k,v in self.items.items() 
-            if (k != '086' or self.activated))
+            or self.array[x, y] in WALLS + ["004"] * (not self.activated)
+            or any(
+                [y, x] in v
+                for k, v in self.items.items()
+                if (k != "086" or self.activated)
+            )
         )
 
     def star_at(self, coords):
