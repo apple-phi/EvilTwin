@@ -7,7 +7,7 @@ import pygame
 
 from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
-from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE
+from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE, SOUNDS
 from .user import user_data
 
 CURRENT_PAGE = 0
@@ -130,6 +130,9 @@ class TitleScreen(Scene):
             "Click anywhere to start", False, (246, 224, 200)
         )
 
+        pygame.mixer.music.load(SOUNDS / "loading.wav")
+        pygame.mixer.music.play(-1, 0.0)
+
     def show_on(self, screen: pygame.Surface):
         screen.blit(self.image, (0, 0))
         self.subtitle.set_alpha(round(255 * math.cos(self.tick / 30) ** 2))
@@ -141,7 +144,10 @@ class TitleScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            self.next_scene = SlideUpBetween(self, IntroScene())
+            pygame.mixer.music.load(SOUNDS / "menu.wav")
+            pygame.mixer.music.set_volume(0.15)
+            pygame.mixer.music.play(-1, 0.0)
+            self.next_scene = SlideUpBetween(self, IntroScreen())
 
 
 class ChangeButton:
@@ -262,11 +268,12 @@ class MenuScreen(Scene):
                     if button.right and CURRENT_PAGE < FURTHEST_PAGE:
                         CURRENT_PAGE += 1
                         self.next_scene = FadeToBlackBetween(self, MenuScreen())
-                    elif not button.right and CURRENT_PAGE > 0:
+                    elif not button.right and CURRENT_PAGE > -1:
                         CURRENT_PAGE -= 1
                         self.next_scene = FadeToBlackBetween(self, MenuScreen())
                     break
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            pygame.mixer.music.stop()
             self.next_scene = FadeToBlackBetween(self, TitleScreen())
 
 
@@ -279,6 +286,13 @@ class LevelScreen(Scene):
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
         self.winner = None
+        self.esc = pygame.transform.scale(
+            pygame.image.load(TILES / "esc.png").convert_alpha(), (48, 48)
+        )
+
+        pygame.mixer.music.load(SOUNDS / "battle.wav")
+        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.play(-1, 0.0)
 
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
@@ -288,11 +302,14 @@ class LevelScreen(Scene):
             self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
+        screen.blit(self.esc, (12, 12))
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
+            elif event.key == pygame.K_r:
+                self.next_scene = FadeToBlackBetween(self, LevelScreen(self.number))
             elif (
                 event.key in MOVES
                 and not self.player.is_moving
@@ -301,24 +318,33 @@ class LevelScreen(Scene):
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
+                    s = pygame.mixer.Sound(SOUNDS / "fx" / "monster_1.mp3")
+                    s.set_volume(0.15)
+                    s.play()
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
         if self.player.xy == self.level.end:
+            s = pygame.mixer.Sound(SOUNDS / "fx" / "fantasy.mp3")
+            s.set_volume(0.15)
+            s.play()
             self.win()
         if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
+            pygame.mixer.Sound(SOUNDS / "fx" / "start-level.wav").play()
             self.lose()
 
     def win(self):
         self.enemy.state = "hit"
         self.player.state = "idle"
         self.winner = self.player
+        pygame.mixer.music.stop()
         user_data.complete(self.number, stars=self.player.stars)
         self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
     def lose(self):
         self.player.state = "hit"
         self.winner = self.enemy
+        pygame.mixer.music.stop()
         self.next_scene = LoseAnimation(
             self, FadeToBlackBetween(self, LevelScreen(self.number))
         )
@@ -336,7 +362,7 @@ def manhattan_dist(x1, y1, x2, y2):
     return abs(x1 - x2) + abs(y1 - y2)
 
 
-class IntroScene(Scene):
+class IntroScreen(Scene):
     x, y = (30, 48)
     duration = 600
     text = """Dear Commander Leto,

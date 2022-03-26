@@ -13,6 +13,7 @@ from .constants import (
     TILES,
     WALLS,
     ITEMS,
+    SOUNDS,
 )
 
 
@@ -86,9 +87,14 @@ class Level:
         return self
 
     def _render_switch(self) -> "Level":
-        self.image.blit(
-            pygame.image.load(TILES / "switch.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
-        )
+        if not self.activated:
+            self.image.blit(
+                pygame.image.load(TILES / "switch_open.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+            )
+        else:
+            self.image.blit(
+                pygame.image.load(TILES / "switch_closed.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
+            )
         return self
 
     def _update_stars(self) -> "Level":
@@ -109,6 +115,9 @@ class Level:
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
+            s=pygame.mixer.Sound(SOUNDS/'fx'/'bonus.mp3')
+            s.set_volume(0.15)
+            s.play()
             self.stars.remove([x, y])
             self._render_all()
             return True
@@ -117,6 +126,9 @@ class Level:
     def flip_switch(self, x, y) -> bool:
         if (x, y) == self.switch:
             self.activated = True
+            s=pygame.mixer.Sound(SOUNDS/'fx'/'destroyed_stones.mp3')
+            s.set_volume(0.15)
+            s.play()
             return True
         return False
 
