@@ -13,6 +13,7 @@ from .user import user_data
 CURRENT_PAGE = 0
 FURTHEST_PAGE = 1
 
+
 class Scene(abc.ABC):
     def __init__(self):
         self.next_scene = None
@@ -140,7 +141,8 @@ class TitleScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            self.next_scene = SlideUpBetween(self, MenuScreen())
+            self.next_scene = SlideUpBetween(self, IntroScene())
+
 
 class ChangeButton:
     image = pygame.image.load(TILES / "014.png")
@@ -156,14 +158,12 @@ class ChangeButton:
         self.text = self.font.render(">" if right else "<", False, (246, 224, 200))
 
     def clickable_at(self, x, y) -> bool:
-        return (
-            self.x <= x <= self.x + self.w
-            and self.y <= y <= self.y + self.h
-        )
+        return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h
 
     def show_on(self, screen: pygame.Surface):
         screen.blit(self.scaled_image, (self.x, self.y))
         screen.blit(self.text, (self.x + self.w / 3, self.y + self.h / 3))
+
 
 class LevelButton:
     image = pygame.image.load(TILES / "014.png")
@@ -226,7 +226,7 @@ class MenuScreen(Scene):
         screen_width, screen_height = pygame.display.get_surface().get_size()
         width, height = screen_width / 6, screen_height / 6
         self.menu = [
-            LevelButton(x, y, width, height, level+CURRENT_PAGE*9)
+            LevelButton(x, y, width, height, level + CURRENT_PAGE * 9)
             for level, (y, x) in enumerate(
                 itertools.product(
                     range(int(width / 2), screen_width, int(width * 2)),
@@ -236,13 +236,15 @@ class MenuScreen(Scene):
         ]
 
         self.changes = [
-            ChangeButton(screen_width-width/3, height/6, width/6, height/6, True),
-            ChangeButton(width/6, height/6, width/6, height/6, False)
+            ChangeButton(
+                screen_width - width / 3, height / 6, width / 6, height / 6, True
+            ),
+            ChangeButton(width / 6, height / 6, width / 6, height / 6, False),
         ]
 
     def show_on(self, screen: pygame.Surface):
         screen.fill((24, 33, 93))
-        for b in self.menu+self.changes:
+        for b in self.menu + self.changes:
             b.show_on(screen)
 
     def handle_event(self, event: pygame.event.Event):
@@ -259,14 +261,10 @@ class MenuScreen(Scene):
                 if button.clickable_at(x, y):
                     if button.right and CURRENT_PAGE < FURTHEST_PAGE:
                         CURRENT_PAGE += 1
-                        self.next_scene = FadeToBlackBetween(
-                            self, MenuScreen()
-                        )
+                        self.next_scene = FadeToBlackBetween(self, MenuScreen())
                     elif not button.right and CURRENT_PAGE > 0:
                         CURRENT_PAGE -= 1
-                        self.next_scene = FadeToBlackBetween(
-                            self, MenuScreen()
-                        )
+                        self.next_scene = FadeToBlackBetween(self, MenuScreen())
                     break
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.next_scene = FadeToBlackBetween(self, TitleScreen())
@@ -296,8 +294,10 @@ class LevelScreen(Scene):
             if event.key == pygame.K_ESCAPE:
                 self.next_scene = FadeToBlackBetween(self, MenuScreen())
             elif (
-                event.key in MOVES and not self.player.is_moving
-                and not self.enemy.is_moving and self.winner is None
+                event.key in MOVES
+                and not self.player.is_moving
+                and not self.enemy.is_moving
+                and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
@@ -334,3 +334,84 @@ class LoseAnimation(Transition):
 
 def manhattan_dist(x1, y1, x2, y2):
     return abs(x1 - x2) + abs(y1 - y2)
+
+
+class IntroScene(Scene):
+    x, y = (30, 48)
+    duration = 600
+    text = """Dear Commander Leto,
+
+I hope this reaches you in time. We
+have uncovered the source of the
+rising galactic unrest - a version
+of yourself from another dimension
+is attempting to steal all of the
+stars in our galaxy! We believe she
+is harvesting their energy to save
+her own dying universe.
+
+Your mission is to save all of the
+stars, but beware, she will always
+do the reverse of your every move.
+
+Yours truly,
+The Prince of the Snailfish
+"""
+    parts = text.replace("\n\n", "\n<x>\n").split("<x>")
+
+    def __init__(self):
+        super().__init__()
+        self.font = pygame.font.SysFont("monospace", 30)
+
+        def render(text):
+            return [
+                self.font.render(line, True, (246, 224, 200))
+                for line in text.splitlines()
+            ]
+
+        self.rendered_parts = list(
+            itertools.accumulate([render(part) for part in self.parts])
+        )
+        image = pygame.display.get_surface().copy()
+        image.fill((24, 33, 93))
+        self.images = []
+        for rendered_part in self.rendered_parts:
+            im = image.copy()
+            im.blits(
+                [
+                    (line, (self.x, self.y + i * 35))
+                    for i, line in enumerate(rendered_part)
+                ]
+            )
+            self.images.append(im)
+        self.im_iter = iter(self.images)
+        self.curr_im = next(self.im_iter)
+        self.elapsed = 0
+
+    def show_on(self, screen: pygame.Surface):
+        screen.blit(self.curr_im, (0, 0))
+        self.elapsed += 1
+
+    def handle_event(self, event):
+        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 100:
+            self.elapsed = 0
+            try:
+                self.curr_im = next(self.im_iter)
+            except StopIteration:
+                self.next_scene = SlideUpBetween(self, MenuScreen())
+
+
+class FadeOver(Transition):
+    """Might not work :)"""
+
+    def __init__(self, old, new, duration=50):
+        self.image = pygame.display.get_surface().copy()
+        super().__init__(old, new, duration=duration)
+
+    def show_on(self, screen: pygame.Surface):
+
+        super().show_on(screen)
+        self.old.show_on(screen)
+        self.new.show_on(self.image)
+        self.image.set_alpha(255 * (1 - self.fraction_elapsed))
+        screen.blit(self.image, (0, 0))
