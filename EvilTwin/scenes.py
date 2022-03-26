@@ -244,6 +244,7 @@ class MenuScreen(Scene):
             ChangeButton(width/6, height/6, width/6, height/6, False)
         ]
 
+        pygame.mixer.music.set_volume(.15)
         pygame.mixer.music.load(SOUNDS/'menu.wav')
         pygame.mixer.music.play(-1, 0.0)
 
@@ -291,6 +292,7 @@ class LevelScreen(Scene):
         self.winner = None
 
         pygame.mixer.music.load(SOUNDS/'battle.wav')
+        pygame.mixer.music.set_volume(.05)
         pygame.mixer.music.play(-1, 0.0)
 
     def show_on(self, screen: pygame.Surface):
@@ -314,11 +316,16 @@ class LevelScreen(Scene):
             ):
                 self.player.state = MOVES[event.key]
                 if self.player.can_move():
+                    s=pygame.mixer.Sound(SOUNDS/'fx'/'monster_1.mp3')
+                    s.set_volume(0.15)
+                    s.play()
                     self.enemy.state = OPPOSITES[self.player.state]
 
     def check_result(self):
         if self.player.xy == self.level.end:
-            pygame.mixer.Sound(SOUNDS/'fx'/'scream.wav').play()
+            s=pygame.mixer.Sound(SOUNDS/'fx'/'fantasy.mp3')
+            s.set_volume(0.15)
+            s.play()
             self.win()
         if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
             pygame.mixer.Sound(SOUNDS/'fx'/'start-level.wav').play()
