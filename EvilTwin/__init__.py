@@ -3,6 +3,7 @@ import sys
 import pygame
 
 pygame.init()
+pygame.mixer.music.set_volume(.15)
 
 from .constants import STAR_SPRITE
 from .scenes import TitleScreen

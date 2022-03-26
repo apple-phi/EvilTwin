@@ -2,6 +2,7 @@ import pathlib
 import pygame
 
 ASSETS = pathlib.Path(__file__).parent / "assets"
+SOUNDS = pathlib.Path(__file__).parent / "Space Music Pack"
 LEVELS = ASSETS / "levels"
 TILES = ASSETS / "tiles"
 SPRITES = ASSETS / "sprites"
