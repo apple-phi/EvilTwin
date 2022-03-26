@@ -3,6 +3,7 @@ import math
 import itertools
 
 import pygame
+from textwrap import dedent
 
 
 from .levels import Level
@@ -10,7 +11,7 @@ from .player import Enemy, Player, MOVES, OPPOSITES
 from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE, SOUNDS
 from .user import user_data
 
-CURRENT_PAGE = 0
+CURRENT_PAGE = -1
 FURTHEST_PAGE = 1
 
 class Scene(abc.ABC):
@@ -230,32 +231,59 @@ class MenuScreen(Scene):
         super().__init__()
         screen_width, screen_height = pygame.display.get_surface().get_size()
         width, height = screen_width / 6, screen_height / 6
+        self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(screen_height / 12))
+
+        self.text = dedent("""\
+                                          HELP:
+            
+            
+            - THE ENEMY MOVES IN THE  
+              OPPOSITE DIRECTION TO YOU
+            
+            - TRY COLLECT ALL 3 STARS IN 
+              EACH LEVEL
+            
+            - REACH THE END (THE ENEMY'S
+              SPAWNPOINT) WITHOUT GETT-
+              ING HIT BY THE ENEMY""").splitlines()
+        
+
         self.menu = [
-            LevelButton(x, y, width, height, level+CURRENT_PAGE*9)
-            for level, (y, x) in enumerate(
-                itertools.product(
-                    range(int(width / 2), screen_width, int(width * 2)),
-                    range(int(height / 2), screen_height, int(height * 2)),
-                ),
-            )
+        LevelButton(x, y, width, height, level+CURRENT_PAGE*9)
+        for level, (y, x) in enumerate(
+            itertools.product(
+                range(int(width / 2), screen_width, int(width * 2)),
+                range(int(height / 2), screen_height, int(height * 2)),
+            ),
+        )
         ]
+
 
         self.changes = [
             ChangeButton(screen_width-width/3, height/6, width/6, height/6, True),
             ChangeButton(width/6, height/6, width/6, height/6, False)
         ]
+        if CURRENT_PAGE == -1:
+            self.changes.pop(1)
 
         pygame.mixer.music.load(SOUNDS/'menu.wav')
         pygame.mixer.music.play(-1, 0.0)
 
     def show_on(self, screen: pygame.Surface):
-        screen.fill((24, 33, 93))
-        for b in self.menu+self.changes:
-            b.show_on(screen)
+        if CURRENT_PAGE > -1:
+            screen.fill((24, 33, 93))
+            for b in self.menu+self.changes:
+                b.show_on(screen)
+        else:
+            screen.fill((24, 33, 93))
+            self.changes[0].show_on(screen)
+            for i in range(len(self.text)):
+                s = self.font.render(self.text[i], False, (246, 224, 200))
+                screen.blit(s, (0, i * 50))
 
     def handle_event(self, event: pygame.event.Event):
         global CURRENT_PAGE
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and CURRENT_PAGE > -1:
             x, y = pygame.mouse.get_pos()
             for button in self.menu:
                 if button.clickable_at(x, y):
@@ -270,12 +298,36 @@ class MenuScreen(Scene):
                         self.next_scene = FadeToBlackBetween(
                             self, MenuScreen()
                         )
+                    elif not button.right:
+                        CURRENT_PAGE -= 1
+                        if CURRENT_PAGE == -1: 
+                            self.next_scene = MenuScreen()
+                        else:
+                            self.next_scene = FadeToBlackBetween(
+                                self, MenuScreen()
+                            )
+                    break
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            for button in self.changes:
+                if button.clickable_at(x, y):
+                    if button.right and CURRENT_PAGE < FURTHEST_PAGE:
+                        CURRENT_PAGE += 1
+                        self.next_scene = FadeToBlackBetween(
+                            self, MenuScreen(), 1
+                        )
                     elif not button.right and CURRENT_PAGE > -1:
                         CURRENT_PAGE -= 1
-                        self.next_scene = FadeToBlackBetween(
-                            self, MenuScreen()
-                        )
+                        if CURRENT_PAGE == -1:
+                            self.next_scene = FadeToBlackBetween(
+                                self, MenuScreen(), 1
+                            )
+                        else:
+                            self.next_scene = FadeToBlackBetween(
+                                self, MenuScreen()
+                            )
                     break
+
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.mixer.music.stop()
             self.next_scene = FadeToBlackBetween(self, TitleScreen())
