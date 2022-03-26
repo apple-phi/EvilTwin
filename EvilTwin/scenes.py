@@ -9,6 +9,7 @@ from .levels import Level
 from .player import Enemy, Player, MOVES, OPPOSITES
 from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE, SOUNDS
 from .user import user_data
+from .animation import StarAnimation
 
 CURRENT_PAGE = 0
 FURTHEST_PAGE = 1
@@ -278,7 +279,7 @@ class MenuScreen(Scene):
 
 
 class LevelScreen(Scene):
-    def __init__(self, number: int):
+    def __init__(self, number):
         super().__init__()
         self.number = number
         self.path = LEVELS / f"{number}.toml"
@@ -317,7 +318,7 @@ class LevelScreen(Scene):
                 and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
-                if self.player.can_move():
+                if self.player.can_move() and self.number != 'Final':
                     s = pygame.mixer.Sound(SOUNDS / "fx" / "monster_1.mp3")
                     s.set_volume(0.15)
                     s.play()
@@ -330,7 +331,9 @@ class LevelScreen(Scene):
             s.play()
             self.win()
         if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
-            pygame.mixer.Sound(SOUNDS / "fx" / "start-level.wav").play()
+            s=pygame.mixer.Sound(SOUNDS / "fx" / "start-level.wav")
+            s.set_volume(0.1)
+            s.play()
             self.lose()
 
     def win(self):
@@ -339,7 +342,11 @@ class LevelScreen(Scene):
         self.winner = self.player
         pygame.mixer.music.stop()
         user_data.complete(self.number, stars=self.player.stars)
-        self.next_scene = FadeToBlackBetween(self, MenuScreen())
+
+        if self.number != 0: #TODO: swap to 8
+            self.next_scene = FadeToBlackBetween(self, MenuScreen())
+            return
+        self.next_scene = FinalScene()
 
     def lose(self):
         self.player.state = "hit"
@@ -349,6 +356,32 @@ class LevelScreen(Scene):
             self, FadeToBlackBetween(self, LevelScreen(self.number))
         )
 
+class FinalScene(LevelScreen):
+    positions = [
+        (350+math.cos(math.pi*2/27*n)*200,350+math.sin(math.pi*2/27*n)*200)
+        for n in range(-14,14)
+    ]
+    def __init__(self):
+        super().__init__('Final')
+        
+        self.stars = [
+            StarAnimation()['rotate'] for _ in range(27)
+        ]
+
+        self.found = sum(
+            ([True]*user_data.stars_in(level, 0)+[False]*(3-user_data.stars_in(level, 0)) for level in range(9))
+        ,[])
+
+    def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
+        screen.blits(
+            zip(
+                [
+                    ((x:=next(star)).set_alpha(255 if self.found[i] else 50),x)[1]
+                    for i,star in enumerate(self.stars)
+                ],self.positions
+            )
+        )
 
 class LoseAnimation(Transition):
     def show_on(self, screen: pygame.Surface):
