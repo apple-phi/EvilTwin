@@ -51,12 +51,13 @@ class Level:
         for tile in self.array.flatten():
             if tile not in self.tileset:
                 self.tileset[tile] = pygame.image.load(TILES / f"{tile}.png")
+        self.tileset['005'] = pygame.image.load(TILES / "005.png")
         return self
 
     def _render_tiles(self) -> "Level":
         self.image.blits(
             [
-                (self.tileset[tile], (x * TILE_SIZE, y * TILE_SIZE))
+                (self.tileset[tile if tile!='004'or not self.activated else'005'], (x * TILE_SIZE, y * TILE_SIZE))
                 for (y, x), tile in np.ndenumerate(self.array)
             ]
         )
@@ -78,7 +79,8 @@ class Level:
             [
                 (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
                 for item, positions in self.items.items()
-                for x, y in positions if item != '086' or self.activated
+                for x, y in positions
+                if (item != '086' or self.activated) and (item != '004' or not self.activated)
             ]
         )
         return self
@@ -141,8 +143,9 @@ class Level:
         return (
             not 0 <= x < self.dimensions[1]
             or not 0 <= y < self.dimensions[1]
-            or self.array[x, y] in WALLS
-            or any([y, x] in v for k,v in self.items.items() if k != '086' or self.activated)
+            or self.array[x, y] in WALLS+['004']*(not self.activated)
+            or any([y, x] in v for k,v in self.items.items() 
+            if (k != '086' or self.activated))
         )
 
     def star_at(self, coords):

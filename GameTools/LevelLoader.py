@@ -32,7 +32,7 @@ class Map:
         except FileNotFoundError:
             print("generating new file")
             self.stars = []
-            self.player, self.enemy = None, None
+            self.player, self.enemy, self.switch = None, None, None
             return self.makeblank(10,10), {}
     def __getitem__(self,xy):
         (x,y) = xy

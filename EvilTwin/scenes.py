@@ -10,6 +10,8 @@ from .player import Enemy, Player, MOVES, OPPOSITES
 from .constants import LEVELS, ASSETS, TILES, STAR_SPRITE
 from .user import user_data
 
+CURRENT_PAGE = 0
+FURTHEST_PAGE = 1
 
 class Scene(abc.ABC):
     def __init__(self):
@@ -140,6 +142,28 @@ class TitleScreen(Scene):
         if event.type == pygame.MOUSEBUTTONUP:
             self.next_scene = SlideUpBetween(self, MenuScreen())
 
+class ChangeButton:
+    image = pygame.image.load(TILES / "014.png")
+
+    def __init__(self, x, y, w, h, right):
+        self.x = x + w / 16  # slight offset due to shadow
+        self.y = y + h / 16
+        self.w = w
+        self.h = h
+        self.right = right
+        self.scaled_image = pygame.transform.scale(self.image, (w, h))
+        self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
+        self.text = self.font.render(">" if right else "<", False, (246, 224, 200))
+
+    def clickable_at(self, x, y) -> bool:
+        return (
+            self.x <= x <= self.x + self.w
+            and self.y <= y <= self.y + self.h
+        )
+
+    def show_on(self, screen: pygame.Surface):
+        screen.blit(self.scaled_image, (self.x, self.y))
+        screen.blit(self.text, (self.x + self.w / 3, self.y + self.h / 3))
 
 class LevelButton:
     image = pygame.image.load(TILES / "014.png")
@@ -202,7 +226,7 @@ class MenuScreen(Scene):
         screen_width, screen_height = pygame.display.get_surface().get_size()
         width, height = screen_width / 6, screen_height / 6
         self.menu = [
-            LevelButton(x, y, width, height, level)
+            LevelButton(x, y, width, height, level+CURRENT_PAGE*9)
             for level, (y, x) in enumerate(
                 itertools.product(
                     range(int(width / 2), screen_width, int(width * 2)),
@@ -211,12 +235,18 @@ class MenuScreen(Scene):
             )
         ]
 
+        self.changes = [
+            ChangeButton(screen_width-width/3, height/6, width/6, height/6, True),
+            ChangeButton(width/6, height/6, width/6, height/6, False)
+        ]
+
     def show_on(self, screen: pygame.Surface):
         screen.fill((24, 33, 93))
-        for b in self.menu:
+        for b in self.menu+self.changes:
             b.show_on(screen)
 
     def handle_event(self, event: pygame.event.Event):
+        global CURRENT_PAGE
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = pygame.mouse.get_pos()
             for button in self.menu:
@@ -224,6 +254,19 @@ class MenuScreen(Scene):
                     self.next_scene = FadeToBlackBetween(
                         self, LevelScreen(button.level)
                     )
+                    break
+            for button in self.changes:
+                if button.clickable_at(x, y):
+                    if button.right and CURRENT_PAGE < FURTHEST_PAGE:
+                        CURRENT_PAGE += 1
+                        self.next_scene = FadeToBlackBetween(
+                            self, MenuScreen()
+                        )
+                    elif not button.right and CURRENT_PAGE > 0:
+                        CURRENT_PAGE -= 1
+                        self.next_scene = FadeToBlackBetween(
+                            self, MenuScreen()
+                        )
                     break
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.next_scene = FadeToBlackBetween(self, TitleScreen())

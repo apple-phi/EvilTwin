@@ -221,6 +221,7 @@ class Game():
         #self.Map.makeblank(50,10)
         self.GS.x,self.GS.y = self.Map.dimensions()
         self.actual_width = max(self.GS.x,13)
+        self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
     
     def blit_all(self):
         for x, y in itertools.product(range(1,self.GS.x+1), range(1,self.GS.y+1)):
