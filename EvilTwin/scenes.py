@@ -143,7 +143,9 @@ class TitleScreen(Scene):
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            pygame.mixer.music.stop()
+            pygame.mixer.music.load(SOUNDS/'menu.wav')
+            pygame.mixer.music.set_volume(.15)
+            pygame.mixer.music.play(-1, 0.0)
             self.next_scene = SlideUpBetween(self, MenuScreen())
 
 class ChangeButton:
@@ -244,10 +246,6 @@ class MenuScreen(Scene):
             ChangeButton(screen_width-width/3, height/6, width/6, height/6, True),
             ChangeButton(width/6, height/6, width/6, height/6, False)
         ]
-
-        pygame.mixer.music.set_volume(.15)
-        pygame.mixer.music.load(SOUNDS/'menu.wav')
-        pygame.mixer.music.play(-1, 0.0)
 
     def show_on(self, screen: pygame.Surface):
         screen.fill((24, 33, 93))
