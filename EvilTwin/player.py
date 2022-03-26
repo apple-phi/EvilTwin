@@ -87,6 +87,7 @@ class BaseCharacter:
             )
 
         self.stars += self.level.collect_star(*self.xy)
+        self.level.flip_switch(*self.xy)
 
     def can_move(self):
         """Check if character can move in current direction,

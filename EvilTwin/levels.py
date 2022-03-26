@@ -25,6 +25,10 @@ class Level:
         self.stars: list[list[int]] = self.data["stars"]
         self.start: list[int] = self.data["start"]
         self.end: tuple[int] = tuple(self.data["end"])
+        #I, Alex, take full responsibility for this crime \/
+        self.switch: tuple[int] = tuple(self.data["switch"]) if "switch" in self.data else [-1,-1]
+        self.activated = False
+
         self.items: dict[str, list[list[int]]] = self.data["items"]
         self.image = pygame.Surface(
             (
@@ -40,7 +44,7 @@ class Level:
         return self._load_tiles()._load_items()
 
     def _render_all(self) -> "Level":
-        return self._render_tiles()._render_items()._render_stars()
+        return self._render_tiles()._render_items()._render_stars()._render_switch()
 
     def _load_tiles(self) -> "Level":
         self.tileset = {}
@@ -74,8 +78,14 @@ class Level:
             [
                 (self.itemset[item], (x * TILE_SIZE, y * TILE_SIZE))
                 for item, positions in self.items.items()
-                for x, y in positions
+                for x, y in positions if item != '086' or self.activated
             ]
+        )
+        return self
+
+    def _render_switch(self) -> "Level":
+        self.image.blit(
+            pygame.image.load(TILES / "switch.png"), (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE)
         )
         return self
 
@@ -99,6 +109,12 @@ class Level:
         if [x, y] in self.stars:
             self.stars.remove([x, y])
             self._render_all()
+            return True
+        return False
+
+    def flip_switch(self, x, y) -> bool:
+        if (x, y) == self.switch:
+            self.activated = True
             return True
         return False
 
@@ -126,7 +142,7 @@ class Level:
             not 0 <= x < self.dimensions[1]
             or not 0 <= y < self.dimensions[1]
             or self.array[x, y] in WALLS
-            or any([y, x] in k for k in self.items.values())
+            or any([y, x] in v for k,v in self.items.items() if k != '086' or self.activated)
         )
 
     def star_at(self, coords):
