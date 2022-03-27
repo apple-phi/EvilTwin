@@ -205,9 +205,9 @@ class Game:
         elif self.mode == "Items":
             self.remove_items(coord)
         elif self.mode in "Player Enemy Switch".split():
-            if p := getattr(self.Map, self.mode):
+            if p := getattr(self.Map, self.mode.lower()):
                 self.to_change.append(p)
-            setattr(self.Map, self.mode, list(coord))
+            setattr(self.Map, self.mode.lower(), list(coord))
         elif self.mode == "Star":
             if list(coord) not in self.Map.stars:
                 self.Map.stars.append(list(coord))
