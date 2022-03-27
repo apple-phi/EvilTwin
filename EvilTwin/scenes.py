@@ -424,8 +424,8 @@ class FinalScene(LevelScreen):
         )
 
     def show_on(self, screen: pygame.Surface):
+        super().show_on(screen)
         if self.frame_count < 150:
-            super().show_on(screen)
             self.draw_stars(
                 screen, 150 + 150 * math.cos(2 * math.pi * self.frame_count / 300)
             )
