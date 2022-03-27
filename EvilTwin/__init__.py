@@ -8,16 +8,15 @@ pygame.mixer.music.set_volume(0.15)
 from .constants import *
 from .scenes import TitleScreen
 
-
-CURSOR = pygame.transform.smoothscale(
-    pygame.image.load(ASSETS / "cursor.png"), (40, 40)
+pygame.mouse.set_cursor(
+    pygame.cursors.Cursor(
+        (0, 0),
+        pygame.image.load("/Users/sandrachua/EvilTwin/EvilTwin/assets/cursor.png"),
+    )
 )
-pygame.mouse.set_visible(False)
 
 
 class Game:
-    pygame.mouse.set_visible(False)
-
     def __init__(self):
         self.screen = pygame.display.set_mode((700, 700), pygame.SCALED)
         pygame.display.set_caption("Mirror Mirror")
@@ -31,7 +30,6 @@ class Game:
             if self.scene.next_scene is not None:
                 self.scene = self.scene.next_scene
             self.scene.show_on(self.screen)
-            self.screen.blit(CURSOR, pygame.mouse.get_pos())
             pygame.display.flip()
             clock.tick(40)
 
