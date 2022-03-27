@@ -11,7 +11,7 @@ from .scenes import TitleScreen
 pygame.mouse.set_cursor(
     pygame.cursors.Cursor(
         (0, 0),
-        pygame.image.load("/Users/sandrachua/EvilTwin/EvilTwin/assets/cursor.png"),
+        pygame.image.load(ASSETS / "cursor.png"),
     )
 )
 
