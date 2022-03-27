@@ -8,16 +8,15 @@ class Map:
 
     def save(self):
         with open(self.filepath,"w") as f:
-            f.write(textwrap.dedent(f"""\
-            name = "Level 1"
-            stars = {[[i-1,j-1] for i,j in self.stars]}
-            start = {[self.player[0]-1,self.player[1]-1]}
-            end = {[self.enemy[0]-1,self.enemy[1]-1]}
-            switch = {[self.switch[0]-1,self.switch[1]-1] if self.switch else [-1,-1]}
-            map = '''
-            """))
-            f.write("\n".join([",".join(self.array[i]) for i in range(len(self.array))]))
-            f.write("\n'''\n[items]\n"+"\n".join(f"{k} = {[[i-1,j-1] for i,j in v]}" for k,v in self.items.items()))
+            toml.dump({
+                "map": "\n".join([",".join(i) for i in self.array]),
+                "start": [self.player[0]-1,self.player[1]-1],
+                "end": [self.enemy[0]-1,self.enemy[1]-1],
+                "switch": [self.switch[0]-1,self.switch[1]-1] if self.switch else [-1,-1],
+                "stars": [[i-1,j-1] for i,j in self.stars],
+                "items": {k:[[i-1,j-1] for i,j in v] for k,v in self.items.items()}
+            }, f)
+
     def load(self):
         try:
             with open(self.filepath,"r") as f:
@@ -34,6 +33,7 @@ class Map:
             self.stars = []
             self.player, self.enemy, self.switch = None, None, None
             return self.makeblank(10,10), {}
+
     def __getitem__(self,xy):
         (x,y) = xy
         return self.array[y-1][x-1]
