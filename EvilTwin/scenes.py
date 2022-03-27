@@ -68,7 +68,7 @@ class SlideUpBetween(Transition):
 
         y=-\frac{2}{d^{3}}x^{3}+\frac{3}{d^{2}}x^{2}
         """
-        return -2 * self.fraction_elapsed**3 + 3 * self.fraction_elapsed**2
+        return -2 * self.fraction_elapsed ** 3 + 3 * self.fraction_elapsed ** 2
 
     def show_on(self, screen: pygame.Surface):
         super().show_on(screen)
@@ -96,7 +96,7 @@ class FadeToBlackBetween(Transition):
         """
         return self.veil.set_alpha(
             255
-            * (4 * self.elapsed * (self.elapsed - self.duration) / self.duration**2)
+            * (4 * self.elapsed * (self.elapsed - self.duration) / self.duration ** 2)
             ** 2
         )
 
@@ -449,8 +449,8 @@ class FinalScene(LevelScreen):
         elif all(self.found):
             image = pygame.Surface((700, 700))
             image.fill((246, 224, 200))
-            col=(self.frame_count-225)*4+50
-            if col<=255:
+            col = (self.frame_count - 225) * 4 + 50
+            if col <= 255:
                 image.set_alpha(col)
                 screen.blit(image, (0, 0))
             else:
@@ -484,6 +484,7 @@ class FinalScene(LevelScreen):
                 positions,
             )
         )
+
 
 class LoseAnimation(Transition):
     def show_on(self, screen: pygame.Surface):
@@ -547,14 +548,15 @@ The Prince of the Snailfish
             self.images.append(im)
         self.im_iter = iter(self.images)
         self.curr_im = next(self.im_iter)
-        self.elapsed = 0
+        self.elapsed = -50
 
     def show_on(self, screen: pygame.Surface):
+        self.curr_im.set_alpha(self.elapsed / 60 * 255 if self.elapsed >= 0 else 255)
         screen.blit(self.curr_im, (0, 0))
         self.elapsed += 1
 
     def handle_event(self, event):
-        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 150:
+        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 200:
             self.elapsed = 0
             try:
                 self.curr_im = next(self.im_iter)
