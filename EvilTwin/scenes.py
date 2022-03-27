@@ -310,6 +310,7 @@ class MenuScreen(Scene):
 
 class LevelScreen(Scene):
     font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
+    text0 = font.render("Esc to exit level", False, (246, 224, 200))
     text1 = font.render("Collect the stars", False, (246, 224, 200))
     text2 = font.render("&", False, (246, 224, 200))
     text3 = font.render("reach the end", False, (246, 224, 200))
@@ -322,9 +323,6 @@ class LevelScreen(Scene):
         self.player = Player(self.level)
         self.enemy = Enemy(self.level)
         self.winner = None
-        self.esc = pygame.transform.scale(
-            pygame.image.load(TILES / "esc.png").convert_alpha(), (48, 48)
-        )
 
         pygame.mixer.music.load(SOUNDS / "battle.wav")
         pygame.mixer.music.set_volume(0.05)
@@ -333,6 +331,7 @@ class LevelScreen(Scene):
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
         if self.number == 0:
+            screen.blit(self.text0, (175, 95))
             screen.blit(self.text1, (165, 205))
             screen.blit(self.text2, (300, 235))
             screen.blit(self.text3, (200, 265))
@@ -342,7 +341,6 @@ class LevelScreen(Scene):
             self.check_result()
         self.enemy.animate_on(screen, idle_every=5)
         self.player.animate_on(screen, idle_every=5)
-        screen.blit(self.esc, (12, 12))
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
