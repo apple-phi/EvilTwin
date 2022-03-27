@@ -99,7 +99,7 @@ class Level:
             self.image.blit(
                 pygame.image.load(TILES / "switch_open.png"),
                 (
-                    (self.switch[0] + 1 / 32) * TILE_SIZE,
+                    (self.switch[0] - 1 / 16) * TILE_SIZE,
                     (self.switch[1] - 1 / 16) * TILE_SIZE,
                 ),
             )
@@ -107,7 +107,7 @@ class Level:
             self.image.blit(
                 pygame.image.load(TILES / "switch_closed.png"),
                 (
-                    (self.switch[0] + 1 / 32) * TILE_SIZE,
+                    (self.switch[0]) * TILE_SIZE,
                     (self.switch[1] - 1 / 16) * TILE_SIZE,
                 ),
             )
