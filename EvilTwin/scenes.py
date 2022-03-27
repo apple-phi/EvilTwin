@@ -419,7 +419,7 @@ class FinalScreen(LevelScreen):
             (
                 [True] * user_data.stars_in(level, 0)
                 + [False] * (3 - user_data.stars_in(level, 0))
-                for level in range(9)
+                for level in range(12)
             ),
             [],
         )
@@ -442,6 +442,11 @@ class FinalScreen(LevelScreen):
             # # yes
 
             if all(self.found):
+                text1 = self.font.render(
+                    "You found all of the stars!",
+                    False,
+                    (246, 224, 200),
+                )
                 self.draw_stars(
                     screen,
                     1500 * math.sin(2 * math.pi * (self.frame_count - 150) / 400),
@@ -452,9 +457,9 @@ class FinalScreen(LevelScreen):
                     False,
                     (246, 224, 200),
                 )
-                r = text1.get_rect()
-                r.center = (350, 600)
-                screen.blit(text1, r)
+            r = text1.get_rect()
+            r.center = (350, 590)
+            screen.blit(text1, r)
         if self.frame_count > 250:
             if all(self.found):
                 self.next_scene = FadeToBlackBetween(self, CreditsScreen())
