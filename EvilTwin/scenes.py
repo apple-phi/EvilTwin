@@ -548,20 +548,36 @@ The Prince of the Snailfish
             self.images.append(im)
         self.im_iter = iter(self.images)
         self.curr_im = next(self.im_iter)
-        self.elapsed = -50
+        self.delay_iter = iter([5000, 17000, 10000, 10000])
+        self.curr_delay = next(self.delay_iter)
+        self.elapsed = 0
+        self.clock = pygame.time.Clock()
+        self.frames_elapsed = -50
 
     def show_on(self, screen: pygame.Surface):
-        self.curr_im.set_alpha(self.elapsed / 60 * 255 if self.elapsed >= 0 else 255)
+        if self.elapsed > self.curr_delay:
+            self.next_part()
+        self.clock.tick()
+        self.curr_im.set_alpha(
+            self.elapsed / self.curr_delay * 2 * 255
+            if self.frames_elapsed >= 0
+            else 255
+        )
         screen.blit(self.curr_im, (0, 0))
-        self.elapsed += 1
+        self.elapsed += self.clock.get_rawtime()
+        self.frames_elapsed += 1
 
     def handle_event(self, event):
-        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN) or self.elapsed > 200:
-            self.elapsed = 0
-            try:
-                self.curr_im = next(self.im_iter)
-            except StopIteration:
-                self.next_scene = SlideUpBetween(self, MenuScreen())
+        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+            self.next_part()
+
+    def next_part(self):
+        self.elapsed = 0
+        try:
+            self.curr_im = next(self.im_iter)
+            self.curr_delay = next(self.delay_iter)
+        except StopIteration:
+            self.next_scene = SlideUpBetween(self, MenuScreen())
 
 
 class FadeOver(Transition):
