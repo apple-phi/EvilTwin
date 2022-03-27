@@ -40,7 +40,9 @@ also from this directory, or run the `run_game.py` script.
 
 ## Artwork
 
-• The tiles and player animations were made by Laurie Noel (`@LaurieNoelArt`).
+• The tiles and player animations were made by Laurie Noel (`@LaurieNoelArt`), taken from her `itch.io` page, where they are freely available.
+
+• The 8-bit game font is by `AbasCreative` on `fontspace.com`.
 
 • The evil twin animations were made by us, based on the player animations.
 
