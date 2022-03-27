@@ -68,7 +68,7 @@ class SlideUpBetween(Transition):
 
         y=-\frac{2}{d^{3}}x^{3}+\frac{3}{d^{2}}x^{2}
         """
-        return -2 * self.fraction_elapsed ** 3 + 3 * self.fraction_elapsed ** 2
+        return -2 * self.fraction_elapsed**3 + 3 * self.fraction_elapsed**2
 
     def show_on(self, screen: pygame.Surface):
         super().show_on(screen)
@@ -96,7 +96,7 @@ class FadeToBlackBetween(Transition):
         """
         return self.veil.set_alpha(
             255
-            * (4 * self.elapsed * (self.elapsed - self.duration) / self.duration ** 2)
+            * (4 * self.elapsed * (self.elapsed - self.duration) / self.duration**2)
             ** 2
         )
 
@@ -355,7 +355,7 @@ class LevelScreen(Scene):
                 and self.winner is None
             ):
                 self.player.state = MOVES[event.key]
-                if self.player.can_move() and self.number != 'Final':
+                if self.player.can_move() and self.number != "Final":
                     s = pygame.mixer.Sound(SOUNDS / "fx" / "monster_1.mp3")
                     s.set_volume(0.15)
                     s.play()
@@ -368,7 +368,7 @@ class LevelScreen(Scene):
             s.play()
             self.win()
         if manhattan_dist(*self.player.xy, *self.enemy.xy) < 1:
-            s=pygame.mixer.Sound(SOUNDS / "fx" / "start-level.wav")
+            s = pygame.mixer.Sound(SOUNDS / "fx" / "start-level.wav")
             s.set_volume(0.1)
             s.play()
             self.lose()
@@ -380,7 +380,7 @@ class LevelScreen(Scene):
         pygame.mixer.music.stop()
         user_data.complete(self.number, stars=self.player.stars)
 
-        if self.number != 0: #TODO: swap to 8
+        if self.number != 8:
             self.next_scene = FadeToBlackBetween(self, MenuScreen())
             return
         self.next_scene = FinalScene()
@@ -393,30 +393,95 @@ class LevelScreen(Scene):
             self, FadeToBlackBetween(self, LevelScreen(self.number))
         )
 
+
 class FinalScene(LevelScreen):
-    positions = [
-        (350+math.cos(math.pi*2/27*n)*200,350+math.sin(math.pi*2/27*n)*200)
-        for n in range(-14,14)
-    ]
+    font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
+
     def __init__(self):
-        super().__init__('Final')
-        
-        self.stars = [
-            StarAnimation()['rotate'] for _ in range(27)
-        ]
+        super().__init__("Final")
+
+        self.radius = 200
+        self.frame_count = 0
+        self.stars = [StarAnimation()["rotate"] for _ in range(27)]
+        self.current_frames = [None] * 27
 
         self.found = sum(
-            ([True]*user_data.stars_in(level, 0)+[False]*(3-user_data.stars_in(level, 0)) for level in range(9))
-        ,[])
+            (
+                [True] * user_data.stars_in(level, 0)
+                + [False] * (3 - user_data.stars_in(level, 0))
+                for level in range(9)
+            ),
+            [],
+        )
 
     def show_on(self, screen: pygame.Surface):
-        super().show_on(screen)
+        if self.frame_count < 150:
+            super().show_on(screen)
+            self.draw_stars(
+                screen, 150 + 150 * math.cos(2 * math.pi * self.frame_count / 300)
+            )
+
+        elif self.frame_count < 225:
+            FinalScene.handle_event = (
+                lambda self, event: setattr(
+                    self, "next_scene", FadeToBlackBetween(self, MenuScreen())
+                )
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+                else None
+            )
+            # yes
+
+            if all(self.found):
+                self.draw_stars(
+                    screen,
+                    1500 * math.sin(2 * math.pi * (self.frame_count - 150) / 400),
+                )
+            else:
+                text1 = self.font.render(
+                    f"If only we had the other {self.found.count(False)} stars!",
+                    False,
+                    (246, 224, 200),
+                )
+                r = text1.get_rect()
+                r.center = (350, 500)
+                screen.blit(text1, r)
+
+        elif all(self.found):
+            image = pygame.Surface((700, 700))
+            image.fill((246, 224, 200))
+            col=(self.frame_count-225)*4+50
+            if col<=255:
+                image.set_alpha(col)
+                screen.blit(image, (0, 0))
+            else:
+                self.next_scene = TitleScreen()
+        else:
+            self.next_scene = FadeToBlackBetween(self, MenuScreen())
+
+        self.frame_count += 1
+
+    def draw_stars(self, screen, radius):
+        positions = [
+            (
+                350 - 8 + math.cos(math.pi * 2 / 27 * n) * radius,
+                350 - 8 + math.sin(math.pi * 2 / 27 * n) * radius,
+            )
+            for n in range(-14, 14)
+        ]
+        if not self.frame_count % 3:
+            self.current_frames = [*map(next, self.stars)]
         screen.blits(
             zip(
                 [
-                    ((x:=next(star)).set_alpha(255 if self.found[i] else 50),x)[1]
-                    for i,star in enumerate(self.stars)
-                ],self.positions
+                    (
+                        (self.current_frames[i]).set_alpha(
+                            255 if self.found[i] else 50
+                        ),
+                        self.current_frames[i],
+                    )[1]
+                    for i in range(27)
+                ],
+                positions,
             )
         )
 
