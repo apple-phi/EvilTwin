@@ -13,7 +13,7 @@ from .user import user_data
 from .animation import StarAnimation
 
 CURRENT_PAGE = 0
-FURTHEST_PAGE = 0
+FURTHEST_PAGE = 1
 
 
 class Scene(abc.ABC):
@@ -163,13 +163,14 @@ class ChangeButton:
         self.right = right
         self.scaled_image = pygame.transform.scale(self.image, (w, h))
         self.font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", int(h / 2))
+        self.font.set_bold(True)
         self.text = self.font.render(">" if right else "<", False, (246, 224, 200))
 
     def clickable_at(self, x, y) -> bool:
         return self.x <= x <= self.x + self.w and self.y <= y <= self.y + self.h
 
     def show_on(self, screen: pygame.Surface):
-        screen.blit(self.scaled_image, (self.x, self.y))
+        # screen.blit(self.scaled_image, (self.x, self.y))
         screen.blit(self.text, (self.x + self.w / 3, self.y + self.h / 3))
 
 
@@ -249,11 +250,11 @@ class MenuScreen(Scene):
 
         self.changes = [
             ChangeButton(
-                screen_width - width / 3, height / 6, width / 6, height / 6, True
+                screen_width - width / 1.9, height / 24, width / 2, height / 2, True
             ),
-            ChangeButton(width / 6, height / 6, width / 6, height / 6, False),
+            ChangeButton(width / 19, height / 24, width / 2, height / 2, False),
         ]
-        if CURRENT_PAGE == -1:
+        if CURRENT_PAGE == 0:
             self.changes.pop(1)
         elif CURRENT_PAGE == FURTHEST_PAGE:
             self.changes.pop(0)
