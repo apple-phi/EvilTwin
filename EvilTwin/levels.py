@@ -98,12 +98,18 @@ class Level:
         if not self.activated:
             self.image.blit(
                 pygame.image.load(TILES / "switch_open.png"),
-                (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE),
+                (
+                    (self.switch[0] + 1 / 32) * TILE_SIZE,
+                    (self.switch[1] - 1 / 16) * TILE_SIZE,
+                ),
             )
         else:
             self.image.blit(
                 pygame.image.load(TILES / "switch_closed.png"),
-                (self.switch[0] * TILE_SIZE, self.switch[1] * TILE_SIZE),
+                (
+                    (self.switch[0] + 1 / 32) * TILE_SIZE,
+                    (self.switch[1] - 1 / 16) * TILE_SIZE,
+                ),
             )
         return self
 
@@ -125,7 +131,7 @@ class Level:
 
     def collect_star(self, x, y) -> bool:
         if [x, y] in self.stars:
-            s=pygame.mixer.Sound(SOUNDS/'fx'/'bonus.mp3')
+            s = pygame.mixer.Sound(SOUNDS / "fx" / "bonus.mp3")
             s.set_volume(0.05)
             s.play()
             self.stars.remove([x, y])
@@ -136,7 +142,7 @@ class Level:
     def flip_switch(self, x, y) -> bool:
         if (x, y) == self.switch:
             if not self.activated:
-                s=pygame.mixer.Sound(SOUNDS/'fx'/'destroyed_stones.mp3')
+                s = pygame.mixer.Sound(SOUNDS / "fx" / "destroyed_stones.mp3")
                 s.set_volume(0.15)
                 s.play()
             self.activated = True
