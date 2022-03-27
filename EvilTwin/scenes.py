@@ -411,14 +411,14 @@ class FinalScene(LevelScreen):
 
         self.radius = 200
         self.frame_count = 0
-        self.stars = [StarAnimation()["rotate"] for _ in range(27)]
-        self.current_frames = [None] * 27
+        self.stars = [StarAnimation()["rotate"] for _ in range(36)]
+        self.current_frames = [None] * 36
 
         self.found = sum(
             (
                 [True] * user_data.stars_in(level, 0)
                 + [False] * (3 - user_data.stars_in(level, 0))
-                for level in range(9)
+                for level in range(12)
             ),
             [],
         )
@@ -457,13 +457,13 @@ class FinalScene(LevelScreen):
 
         elif all(self.found):
             image = pygame.Surface((700, 700))
-            image.fill((246, 224, 200))
+            image.fill((255, 255, 255))
             col = (self.frame_count - 225) * 4 + 50
             if col <= 255:
                 image.set_alpha(col)
                 screen.blit(image, (0, 0))
             else:
-                self.next_scene = TitleScreen()
+                self.next_scene = FadeToBlackBetween(self,TitleScreen())
         else:
             self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
@@ -472,10 +472,10 @@ class FinalScene(LevelScreen):
     def draw_stars(self, screen, radius):
         positions = [
             (
-                350 - 8 + math.cos(math.pi * 2 / 27 * n) * radius,
-                350 - 8 + math.sin(math.pi * 2 / 27 * n) * radius,
+                350 - 8 + math.cos(math.pi * 2 / 36 * n) * radius,
+                350 - 8 + math.sin(math.pi * 2 / 36 * n) * radius,
             )
-            for n in range(-14, 14)
+            for n in range(-18, 18)
         ]
         if not self.frame_count % 3:
             self.current_frames = [*map(next, self.stars)]
@@ -488,7 +488,7 @@ class FinalScene(LevelScreen):
                         ),
                         self.current_frames[i],
                     )[1]
-                    for i in range(27)
+                    for i in range(36)
                 ],
                 positions,
             )

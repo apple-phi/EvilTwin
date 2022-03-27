@@ -23,7 +23,7 @@ class Game:
 
         self.prevpressed = False
         self.mode = "Paintbrush"
-        self.stored = WALLS[0]
+        self.stored = "028"
 
         self.to_change = []
         self.rect_selection = []
@@ -80,7 +80,10 @@ class Game:
             )
 
         image = pygame.Surface((10, 10))
-        for col, obj in zip(([255,0,0],[0,255,0],[0,0,255]),(self.Map.enemy,self.Map.player,self.Map.switch)):
+        for col, obj in zip(
+            ([255, 0, 0], [0, 255, 0], [0, 0, 255]),
+            (self.Map.enemy, self.Map.player, self.Map.switch),
+        ):
             image.fill(col)
             if obj:
                 self.screen.blit(
@@ -93,33 +96,47 @@ class Game:
 
         pygame.display.flip()
 
+    def handle_copy(self, coord):
+        if coord[1] <= self.y and coord[0] <= self.x:
+            self.stored = self.Map[coord]
+            if self.mode not in ("Paintbrush", "R_Sel"):
+                self.mode = "Paintbrush"
+        elif coord[1] <= self.y + 9:
+            coord = coord[0], coord[1] - self.y
+            if coord in self.cols:
+                self.stored = self.cols[coord]
+                if self.mode not in ("Paintbrush", "R_Sel"):
+                    self.mode = "Paintbrush"
+
     def CheckEvents(self):
         pygame.event.get()
+
         pressed1, pressed2, _ = pygame.mouse.get_pressed()
         pos = pygame.mouse.get_pos()
         coord = self.get_coords(pos)
-        if pressed2 and coord[1] <= self.y and coord[0] <= self.x:
-            self.stored = self.Map[coord]
-            if self.mode not in ("Paintbrush", "Rect_select"):
-                self.mode = "Paintbrush"
+        if pressed2:
+            self.handle_copy(coord)
+
+        if not pressed1 and self.prevpressed and self.mode == "R_Sel":
+            if coord[1] <= self.y and coord[0] <= self.x:
+                for x, y in itertools.product(
+                    range(
+                        min(coord[0], self.rect_selection[0]),
+                        max(coord[0], self.rect_selection[0]) + 1,
+                    ),
+                    range(
+                        min(coord[1], self.rect_selection[1]),
+                        max(coord[1], self.rect_selection[1]) + 1,
+                    ),
+                ):
+                    self.Map[x, y] = self.stored
+                    self.to_change.append([x, y])
+                self.rect_selection = []
+
         if pressed1:
             self.handle_pressed(coord)
+            self.prevpressed = True
         else:
-            if self.prevpressed and self.mode == "R_Sel":
-                if coord[1] <= self.y and coord[0] <= self.x:
-                    for x, y in itertools.product(
-                        range(
-                            min(coord[0], self.rect_selection[0]),
-                            max(coord[0], self.rect_selection[0]) + 1,
-                        ),
-                        range(
-                            min(coord[1], self.rect_selection[1]),
-                            max(coord[1], self.rect_selection[1]) + 1,
-                        ),
-                    ):
-                        self.Map[x, y] = self.stored
-                        self.to_change.append([x, y])
-                self.rect_selection = []
             self.prevpressed = False
 
     def get_coords(self, pos):
@@ -162,17 +179,14 @@ class Game:
             self.blit_tile(x, y)
 
     def handle_pressed(self, coord):
-        if coord[1] == (self.y + 9) and not self.prevpressed:
-            self.handle_toolbar(coord)
+        if not self.prevpressed:
+            if coord[1] == (self.y + 9):
+                self.handle_toolbar(coord)
 
-        elif self.y < coord[1] < self.y + 9:
-            coord = coord[0], coord[1] - self.y
-            if coord in self.cols:
-                self.stored = self.cols[coord]
-                if self.mode not in ("Paintbrush", "Rect_select"):
-                    self.mode = "Paintbrush"
+            elif self.y < coord[1] < self.y + 9:
+                self.handle_copy(coord)
 
-        elif coord[1] <= self.y and coord[0] <= self.x:
+        if coord[1] <= self.y and coord[0] <= self.x:
             self.handle_draw(coord)
 
         self.prevpressed = True
@@ -202,7 +216,7 @@ class Game:
         if self.mode == "Paintbrush":
             self.Map[coord] = self.stored
             self.to_change.append(coord)
-        elif self.mode == "Items":
+        elif self.mode == "Remove Items":
             self.remove_items(coord)
         elif self.mode in "Player Enemy Switch".split():
             if p := getattr(self.Map, self.mode.lower()):
