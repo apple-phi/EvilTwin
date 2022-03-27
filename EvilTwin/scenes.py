@@ -617,12 +617,12 @@ class CreditsScreen(Scene):
         self.tick = 0
         self.image = pygame.display.get_surface().copy()
         self.image.fill((0, 0, 0))
-        t1 = self.title_font.render("Thanks", None, (225, 124, 183))
-        t2 = self.title_font.render("for", None, (225, 124, 183))
-        t3 = self.title_font.render("playing!", None, (225, 124, 183))
-        self.image.blit(t1, (175, 150))
-        self.image.blit(t2, (260, 245))
-        self.image.blit(t3, (140, 340))
+
+        for text, y in zip("Thanks for playing!".split(),(150,245,340)):
+            t = self.title_font.render(text, None, (225, 124, 183))
+            r = t.get_rect()
+            r.center = (350,y)
+            self.image.blit(t,r)
 
         self.subtitle = self.subtitle_font.render(
             "Click anywhere to restart", False, (246, 224, 200)
