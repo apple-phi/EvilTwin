@@ -13,7 +13,7 @@ from .user import user_data
 from .animation import StarAnimation
 
 CURRENT_PAGE = 0
-FURTHEST_PAGE = 0
+FURTHEST_PAGE = 1
 
 
 class Scene(abc.ABC):
