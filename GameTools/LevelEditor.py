@@ -14,13 +14,9 @@ TILENUM = 104
 class Game():
     def __init__(self):
         self.path = pathlib.Path(__file__).parent
-        print(self.path)
+        self.cellsize = 64
 
-        #filepath = self.path + "/GameStuff/ARRAY.txt"
-        #filepath = (self.path.parent/"EvilTwin/assets/levels/1.toml").absolute()
-        filepath = self.path / "maze2.toml"
-        print(filepath)
-
+        filepath = (self.path.parent/"EvilTwin/assets/levels/1.toml").absolute()
         self.load_map(filepath)
 
 
@@ -31,7 +27,7 @@ class Game():
         self.to_change = []
         self.rect_selection = []
 
-        self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
+        self.screen = pygame.display.set_mode((self.actual_width*self.cellsize, (self.y+9)*self.cellsize))
 
         self.pallete = {f'{n:03d}':pygame.image.load(TILES/f"{n:03d}.png") for n in range(TILENUM)}
         self.tools = {1:"Brush",2:"R_Sel",3:"Remove Items",4:"Player",5:"Enemy",6:"Star",7:"Switch",8:"Play",self.actual_width-1:"Load_from",self.actual_width:"Save_to"}
@@ -43,7 +39,7 @@ class Game():
 
     def blit_tile(self,x,y):
         tile = self.Map[x,y]
-        cs = self.GS.cellsize
+        cs = self.cellsize
         drawpos = ((x-1)*cs, (y-1)*cs, cs, cs)
         #pygame.draw.rect(self.screen,self.pallete[tile],drawpos)
         #self.print_txt(tile,x,y)
@@ -64,28 +60,28 @@ class Game():
         for x,y in self.Map.stars:
             self.screen.blit(
                 image,
-                (self.GS.cellsize*(x-1),self.GS.cellsize*(y-1)),
+                (self.cellsize*(x-1),self.cellsize*(y-1)),
             )
         image = pygame.Surface((10,10))
         image.fill([255,0,0])
         if self.Map.enemy:
             self.screen.blit(
                 image,
-                (self.GS.cellsize*(self.Map.enemy[0]-1),self.GS.cellsize*(self.Map.enemy[1]-1)),
+                (self.cellsize*(self.Map.enemy[0]-1),self.cellsize*(self.Map.enemy[1]-1)),
             )
         image = pygame.Surface((10,10))
         image.fill([0,255,0])
         if self.Map.player:
             self.screen.blit(
                 image,
-                (self.GS.cellsize*(self.Map.player[0]-1),self.GS.cellsize*(self.Map.player[1]-1)),
+                (self.cellsize*(self.Map.player[0]-1),self.cellsize*(self.Map.player[1]-1)),
             )
         image = pygame.Surface((10,10))
         image.fill([0,0,255])
         if self.Map.switch:
             self.screen.blit(
                 image,
-                (self.GS.cellsize*(self.Map.switch[0]-1),self.GS.cellsize*(self.Map.switch[1]-1)),
+                (self.cellsize*(self.Map.switch[0]-1),self.cellsize*(self.Map.switch[1]-1)),
             )
             
         pygame.display.flip()
@@ -99,12 +95,12 @@ class Game():
         pressed1, pressed2, _ = pygame.mouse.get_pressed()
         pos = pygame.mouse.get_pos()
         coord = self.get_coords(pos)
-        if pressed2 and coord[1] <= self.GS.y and coord[0] <= self.GS.x:
+        if pressed2 and coord[1] <= self.y and coord[0] <= self.x:
             self.stored = self.Map[coord]
             if self.mode not in ('Paintbrush','Rect_select'):
                 self.mode = 'Paintbrush'
         if pressed1:
-            if coord[1] == (self.GS.y+9) and not self.prevpressed:
+            if coord[1] == (self.y+9) and not self.prevpressed:
                 self.rect_selection = []
                 if coord[0]==1:
                     self.mode = "Paintbrush"
@@ -129,15 +125,15 @@ class Game():
                 elif coord[0]==self.actual_width:
                     print("SAVING FILE")
                     self.Map.save()
-            elif self.GS.y<coord[1]<self.GS.y+9:
-                coord = coord[0],coord[1]-self.GS.y
+            elif self.y<coord[1]<self.y+9:
+                coord = coord[0],coord[1]-self.y
                 if coord in self.cols:
                     self.stored = self.cols[coord]
                     if self.mode not in ('Paintbrush','Rect_select'):
                         self.mode = 'Paintbrush'
 
 
-            elif coord[1] <= self.GS.y and coord[0] <= self.GS.x:
+            elif coord[1] <= self.y and coord[0] <= self.x:
                 if self.mode == "Paintbrush":
                     self.Map[coord] = self.stored
                     self.to_change.append(coord)
@@ -172,7 +168,7 @@ class Game():
                 elif self.mode == "Rect_select":
                     if len(self.rect_selection) == 0 and not self.prevpressed:
                         self.rect_selection = coord
-                        cs = self.GS.cellsize
+                        cs = self.cellsize
                         drawpos = ((coord[0]-0.6)*cs, (coord[1]-1)*cs, int(cs/5), int(cs/5)) #little green indicator
                         pygame.draw.rect(self.screen,(0,255,0),drawpos)
 
@@ -181,7 +177,7 @@ class Game():
             self.prevpressed = True
         else:
             if self.prevpressed and self.mode == "Rect_select":
-                if coord[1]<=self.GS.y and coord[0] <= self.GS.x:
+                if coord[1]<=self.y and coord[0] <= self.x:
                     for x, y in itertools.product(range(min(coord[0],self.rect_selection[0]),max(coord[0],self.rect_selection[0])+1), range(min(coord[1],self.rect_selection[1]),max(coord[1],self.rect_selection[1])+1)):
                         self.Map[x,y] = self.stored
                         self.to_change.append([x,y])
@@ -191,10 +187,10 @@ class Game():
 
     
 
-    def get_coords(self,pos): return [pos[0]//self.GS.cellsize+1,pos[1]//self.GS.cellsize+1]
+    def get_coords(self,pos): return [pos[0]//self.cellsize+1,pos[1]//self.cellsize+1]
 
     def print_txt(self,tile,x,y):
-        cs = self.GS.cellsize
+        cs = self.cellsize
         font = pygame.font.Font('freesansbold.ttf', 20)
         if tile in self.pallete.keys(): 
             text = font.render(tile, True, (0,0,0),self.pallete[tile])
@@ -206,24 +202,23 @@ class Game():
         self.screen.blit(text, textRect)
     
     def load_map(self,filepath):
-        self.GS = Stats()
         self.Map = Map(filepath,ITEMS,WALLS[0])
         #self.Map.makeblank(50,10)
-        self.GS.x,self.GS.y = self.Map.dimensions()
-        self.actual_width = max(self.GS.x,13)
-        self.screen = pygame.display.set_mode((self.actual_width*self.GS.cellsize, (self.GS.y+9)*self.GS.cellsize))
+        self.x,self.y = self.Map.dimensions()
+        self.actual_width = max(self.x,13)
+        self.screen = pygame.display.set_mode((self.actual_width*self.cellsize, (self.y+9)*self.cellsize))
     
     def blit_all(self):
         for x, y in itertools.product(range(1,self.actual_width+1), range(1,9)):
-            cs = self.GS.cellsize
-            drawpos = ((x-1)*cs, (self.GS.y-1+y)*cs, cs, cs)
+            cs = self.cellsize
+            drawpos = ((x-1)*cs, (self.y-1+y)*cs, cs, cs)
             self.screen.blit(pygame.transform.scale(self.pallete[self.cols[(x,y)]],(64,64)),drawpos)
             
 
         for x in range(1,self.actual_width+1): #bottom bit: tool menu
             if x in self.tools:
-                self.print_txt(self.tools[x],x,self.GS.y+9)
-        for x, y in itertools.product(range(1,self.GS.x+1), range(1,self.GS.y+1)):
+                self.print_txt(self.tools[x],x,self.y+9)
+        for x, y in itertools.product(range(1,self.x+1), range(1,self.y+1)):
             self.blit_tile(x,y)
 
 g = Game()
