@@ -28,10 +28,6 @@ class Game:
         self.to_change = []
         self.rect_selection = []
 
-        self.screen = pygame.display.set_mode(
-            (self.actual_width * self.cellsize, (self.y + 9) * self.cellsize)
-        )
-
         self.pallete = {
             f"{n:03d}": pygame.image.load(TILES / f"{n:03d}.png")
             for n in range(TILENUM)
@@ -160,7 +156,8 @@ class Game:
         self.x, self.y = self.Map.dimensions()
         self.actual_width = max(self.x, 13)
         self.screen = pygame.display.set_mode(
-            (self.actual_width * self.cellsize, (self.y + 9) * self.cellsize)
+            (self.actual_width * self.cellsize, (self.y + 9) * self.cellsize),
+            pygame.SCALED
         )
 
     def blit_all(self):
