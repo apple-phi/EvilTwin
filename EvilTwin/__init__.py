@@ -18,8 +18,10 @@ pygame.mouse.set_cursor(
 
 class Game:
     def __init__(self):
-        self.screen = pygame.display.set_mode((700, 700), pygame.SCALED)
-        pygame.display.set_caption("Mirror Mirror")
+        self.screen = pygame.display.set_mode(
+            (700, 700), pygame.SCALED | pygame.RESIZABLE
+        )
+        pygame.display.set_caption("Mirror Mirror", "Mirror Mirror")
         pygame.display.set_icon(pygame.image.load(ASSETS / "cute_star.png"))
         self.scene = TitleScreen()
 
