@@ -1,4 +1,5 @@
 import abc
+import contextlib
 import math
 import itertools
 
@@ -14,6 +15,14 @@ from .animation import StarAnimation
 
 CURRENT_PAGE = 0
 FURTHEST_PAGE = 1
+
+level_ns = []
+for level in LEVELS.iterdir():
+    tmp = level.stem
+    with contextlib.suppress(ValueError):
+        level_ns.append(int(tmp))
+
+MAX_LEVEL = max(level_ns)
 
 
 class Scene(abc.ABC):
@@ -246,6 +255,7 @@ class MenuScreen(Scene):
                     range(int(height / 2), screen_height, int(height * 2)),
                 ),
             )
+            if level + CURRENT_PAGE * 9 <= MAX_LEVEL
         ]
 
         self.changes = [
