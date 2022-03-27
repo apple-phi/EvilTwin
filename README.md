@@ -6,15 +6,19 @@ she discovers that the infamous criminal stealing all of the stars in
 the galaxy is none other than a version of herself from another dimension!
 Can she retrieve the stars before her evil twin escapes with them and restore balance to the universe?
 
-## Running the game
+## Installing requirements
 
-To download requirements run:
+To download the required PyPI packages, run:
 
 ```sh
 pip install -r requirements.txt
 ```
 
 from this directory.
+
+The game has been tested on Windows and MacOS with Python 3.10, but should also work with Python 3.9.
+
+## Running the game
 
 To play the game, run:
 
