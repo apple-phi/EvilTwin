@@ -389,10 +389,11 @@ class LevelScreen(Scene):
         pygame.mixer.music.stop()
         user_data.complete(self.number, stars=self.player.stars)
 
-        if self.number != 8:
-            self.next_scene = FadeToBlackBetween(self, MenuScreen())
-            return
-        self.next_scene = FinalScene()
+        self.next_scene = (
+            FinalScreen()
+            if self.number == 11
+            else FadeToBlackBetween(self, MenuScreen())
+        )
 
     def lose(self):
         self.player.state = "hit"
@@ -403,7 +404,7 @@ class LevelScreen(Scene):
         )
 
 
-class FinalScene(LevelScreen):
+class FinalScreen(LevelScreen):
     font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
 
     def __init__(self):
@@ -431,14 +432,14 @@ class FinalScene(LevelScreen):
             )
 
         elif self.frame_count < 225:
-            FinalScene.handle_event = (
-                lambda self, event: setattr(
-                    self, "next_scene", FadeToBlackBetween(self, MenuScreen())
-                )
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
-                else None
-            )
-            # yes
+            # FinalScene.handle_event = (
+            #     lambda self, event: setattr(
+            #         self, "next_scene", FadeToBlackBetween(self, MenuScreen())
+            #     )
+            #     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+            #     else None
+            # )
+            # # yes
 
             if all(self.found):
                 self.draw_stars(
@@ -447,25 +448,18 @@ class FinalScene(LevelScreen):
                 )
             else:
                 text1 = self.font.render(
-                    f"If only we had the other {self.found.count(False)} stars!",
+                    f"We still have {self.found.count(False)} stars to save!",
                     False,
                     (246, 224, 200),
                 )
                 r = text1.get_rect()
-                r.center = (350, 500)
+                r.center = (350, 600)
                 screen.blit(text1, r)
-
-        elif all(self.found):
-            image = pygame.Surface((700, 700))
-            image.fill((246, 224, 200))
-            col = (self.frame_count - 225) * 4 + 50
-            if col <= 255:
-                image.set_alpha(col)
-                screen.blit(image, (0, 0))
+        if self.frame_count > 250:
+            if all(self.found):
+                self.next_scene = FadeToBlackBetween(self, CreditsScreen())
             else:
-                self.next_scene = TitleScreen()
-        else:
-            self.next_scene = FadeToBlackBetween(self, MenuScreen())
+                self.next_scene = FadeToBlackBetween(self, MenuScreen())
 
         self.frame_count += 1
 
@@ -493,6 +487,10 @@ class FinalScene(LevelScreen):
                 positions,
             )
         )
+
+
+def ease_in_out_quad(x):
+    return 2 * x * x if x < 0.5 else 1 - pow(-2 * x + 2, 2) / 2
 
 
 class LoseAnimation(Transition):
@@ -603,3 +601,43 @@ class FadeOver(Transition):
         self.new.show_on(self.image)
         self.image.set_alpha(255 * (1 - self.fraction_elapsed))
         screen.blit(self.image, (0, 0))
+
+
+class CreditsScreen(Scene):
+    title_font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 120)
+    subtitle_font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
+
+    def __init__(self):
+        super().__init__()
+        self.tick = 0
+        self.image = pygame.display.get_surface().copy()
+        self.image.fill((0, 0, 0))
+        t1 = self.title_font.render("Thanks", None, (225, 124, 183))
+        t2 = self.title_font.render("for", None, (225, 124, 183))
+        t3 = self.title_font.render("playing!", None, (225, 124, 183))
+        self.image.blit(t1, (175, 150))
+        self.image.blit(t2, (260, 245))
+        self.image.blit(t3, (140, 340))
+
+        self.subtitle = self.subtitle_font.render(
+            "Click anywhere to restart", False, (246, 224, 200)
+        )
+
+        pygame.mixer.music.load(SOUNDS / "loading.wav")
+        pygame.mixer.music.play(-1, 0.0)
+
+    def show_on(self, screen: pygame.Surface):
+        screen.blit(self.image, (0, 0))
+        self.subtitle.set_alpha(round(255 * math.cos(self.tick / 30) ** 2))
+        self.tick += 1
+        screen.blit(
+            self.subtitle,
+            (130, 550),
+        )
+
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            pygame.mixer.music.load(SOUNDS / "menu.wav")
+            pygame.mixer.music.set_volume(0.15)
+            pygame.mixer.music.play(-1, 0.0)
+            self.next_scene = FadeToBlackBetween(self, TitleScreen())
