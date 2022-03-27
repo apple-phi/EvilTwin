@@ -32,6 +32,8 @@ also from this directory, or run the `run_game.py` script.
 
 • Arrow keys or WASD to choose your direction of movement.
 
+• `r` to restart level.
+
 • ESC will take you back to the previous page.
 
 • Press keys or click to speed through the intro.

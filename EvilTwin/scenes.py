@@ -310,7 +310,7 @@ class MenuScreen(Scene):
 
 class LevelScreen(Scene):
     font = pygame.font.Font(ASSETS / "Pixeboy-font.ttf", 40)
-    text0 = font.render("Esc to exit level", False, (246, 224, 200))
+    text0 = font.render("R to restart level", False, (246, 224, 200))
     text1 = font.render("Collect the stars", False, (246, 224, 200))
     text2 = font.render("&", False, (246, 224, 200))
     text3 = font.render("reach the end", False, (246, 224, 200))
@@ -331,7 +331,7 @@ class LevelScreen(Scene):
     def show_on(self, screen: pygame.Surface):
         self.level.show_on(screen)
         if self.number == 0:
-            screen.blit(self.text0, (175, 95))
+            screen.blit(self.text0, (162.5, 95))
             screen.blit(self.text1, (165, 205))
             screen.blit(self.text2, (300, 235))
             screen.blit(self.text3, (200, 265))
